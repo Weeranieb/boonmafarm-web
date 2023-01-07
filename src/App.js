@@ -1,25 +1,36 @@
-import logo from './logo.svg';
-import './App.css';
-
-function App() {
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div
+      className="d-flex flex-column flex-shrink-0 p-3 bg-light"
+      style={{ width: "280px", position: "fixed", height: "100%" }}
+    >
+      <h3 className="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
+        Boonmafarm
+      </h3>
+      <hr />
+      <ul className="nav nav-pills flex-column mb-auto">
+        <li>
+          <a href="#!" className="nav-link link-dark">
+            หน้าแรก
+          </a>
+          <a href="#!" className="nav-link link-dark">
+            บ่อปลา
+          </a>
+          <a href="#!" className="nav-link link-dark">
+            กรอกข้อมูล
+          </a>
+          <a href="#!" className="nav-link link-dark">
+            สถิติ
+          </a>
+          <a href="#!" className="nav-link link-dark">
+            ประวัติ
+          </a>
+        </li>
+      </ul>
+      <hr />
+      <div className="dropdown">mdo</div>
     </div>
   );
-}
+};
 
 export default App;
