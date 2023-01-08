@@ -1,42 +1,39 @@
+import { Sidebar, Menu, MenuItem, SubMenu } from "react-pro-sidebar";
+import SidebarHeader from "./components/SidebarHeader";
+
 const App = () => {
   return (
     <div
-      className="d-flex flex-column flex-shrink-0 p-3"
       style={{
-        width: "280px",
+        display: "flex",
         position: "fixed",
         height: "100%",
-        backgroundColor: "#232d44",
       }}
     >
-      <div className="d-flex align-items-center mb-3 mb-md-0 link-light text-decoration-none justify-content-between">
-        <div className="text-start h2">Boonmafarm</div>
-        <div className="text-end btn btn-secondary">
-          <i class="fa-regular fa-user"></i>
-        </div>
-      </div>
-      <hr className="bg-light" />
-      <ul className="nav nav-pills flex-column mb-auto">
-        <li>
-          <a href="#!" className="nav-link link-light">
+      <Sidebar>
+        <SidebarHeader />
+        <Menu>
+          <MenuItem icon={<i class="fa-solid fa-house-chimney"></i>}>
             หน้าแรก
-          </a>
-          <a href="#!" className="nav-link link-light">
+          </MenuItem>
+          <MenuItem icon={<i class="fa-solid fa-fish-fins"></i>}>
             บ่อปลา
-          </a>
-          <a href="#!" className="nav-link link-light">
-            กรอกข้อมูล
-          </a>
-          <a href="#!" className="nav-link link-light">
+          </MenuItem>
+          <SubMenu label="กรอกข้อมูล" icon={<i class="fa-solid fa-table"></i>}>
+            <MenuItem> เหยื่อเข้า </MenuItem>
+            <MenuItem> เหยื่อรายวัน </MenuItem>
+            <MenuItem> ค่าไฟ </MenuItem>
+            <MenuItem> ราคาเหยื่อ </MenuItem>
+          </SubMenu>
+          <MenuItem icon={<i class="fa-solid fa-chart-simple"></i>}>
             สถิติ
-          </a>
-          <a href="#!" className="nav-link link-light">
-            ประวัติ
-          </a>
-        </li>
-      </ul>
-      <hr className="bg-light" />
-      <div className="dropdown text-light">mdo</div>
+          </MenuItem>
+          <MenuItem icon={<i class="fa-solid fa-clock-rotate-left"></i>}>
+            {" "}
+            ประวัติ{" "}
+          </MenuItem>
+        </Menu>
+      </Sidebar>
     </div>
   );
 };
