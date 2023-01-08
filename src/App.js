@@ -1,3 +1,4 @@
+import RoutePage from "./components/RoutePage";
 import SidebarContent from "./components/SidebarContent";
 
 const App = () => {
@@ -10,6 +11,14 @@ const App = () => {
       }}
     >
       <SidebarContent />
+      <main
+        style={{
+          padding: 10,
+          width: "1220px",
+        }}
+      >
+        <RoutePage />
+      </main>
     </div>
   );
 };

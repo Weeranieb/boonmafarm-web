@@ -1,5 +1,7 @@
 import { Sidebar, Menu, MenuItem, SubMenu } from "react-pro-sidebar";
 import SidebarHeader from "./SidebarHeader";
+import { Link } from "react-router-dom";
+
 const SidebarContent = () => {
   return (
     <Sidebar>
@@ -8,7 +10,12 @@ const SidebarContent = () => {
         <MenuItem icon={<i class="fa-solid fa-house-chimney"></i>}>
           หน้าแรก
         </MenuItem>
-        <MenuItem icon={<i class="fa-solid fa-fish-fins"></i>}>บ่อปลา</MenuItem>
+        <MenuItem
+          icon={<i class="fa-solid fa-fish-fins"></i>}
+          // link={<Link to="/ponds" />}
+        >
+          บ่อปลา
+        </MenuItem>
         <SubMenu label="กรอกข้อมูล" icon={<i class="fa-solid fa-table"></i>}>
           <MenuItem> เหยื่อเข้า </MenuItem>
           <MenuItem> เหยื่อรายวัน </MenuItem>
