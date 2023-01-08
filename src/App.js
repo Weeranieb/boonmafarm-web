@@ -8,17 +8,13 @@ const App = () => {
         style={{
           display: "flex",
           position: "fixed",
-          height: "100%",
+          overflow: "hidden",
+          height: "100vh",
+          width: "100vw",
         }}
       >
         <SidebarContent />
-        <main
-          // className="d-flex"
-          style={{
-            padding: 10,
-            width: "1220px",
-          }}
-        >
+        <main className="container text-center">
           <RoutePage />
         </main>
       </div>
