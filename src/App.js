@@ -1,11 +1,24 @@
-import React from "react";
-import SideNavi from "./components/SideNavi";
-
+import RoutePage from "./components/RoutePage";
+import SidebarContent from "./components/SidebarContent";
+import { BrowserRouter as Router } from "react-router-dom";
 const App = () => {
   return (
-    <div>
-      <SideNavi />
-    </div>
+    <Router>
+      <div
+        style={{
+          display: "flex",
+          position: "fixed",
+          overflow: "hidden",
+          height: "100vh",
+          width: "100vw",
+        }}
+      >
+        <SidebarContent />
+        <main className="container text-center">
+          <RoutePage />
+        </main>
+      </div>
+    </Router>
   );
 };
 
