@@ -14,9 +14,7 @@ const App = () => {
         }}
       >
         <SidebarContent />
-        <main className="container text-center">
-          <RoutePage />
-        </main>
+        <RoutePage />
       </div>
     </Router>
   );
