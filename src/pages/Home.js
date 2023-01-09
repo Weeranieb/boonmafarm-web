@@ -1,5 +1,7 @@
 import { Fragment } from "react";
 import "./Home.css";
+import { Link } from "react-router-dom";
+
 const Home = () => {
   return (
     <Fragment>
@@ -25,12 +27,38 @@ const Home = () => {
               <h4 class="my-0 fw-normal">กิจกรรมล่าสุด</h4>
             </div>
             <div class="card-body text-align-left">
-              <ul class="list-unstyled mt-3 mb-4">
-                <li>9 ธันวาคม 2565 16:45น. ย้ายปลา 1 ไป 3</li>
-                <li>9 ธันวาคม 2565 16:45น. ย้ายปลา 1 ไป 3</li>
-                <li>9 ธันวาคม 2565 16:45น. ย้ายปลา 1 ไป 3</li>
-                <li>9 ธันวาคม 2565 16:45น. ย้ายปลา 1 ไป 3</li>
-              </ul>
+              <table className="table">
+                <tbody>
+                  <tr>
+                    <td>9 ธันวาคม 2565 16:45น.</td>
+                    <td>ย้ายปลา 1 ไป 3</td>
+                  </tr>
+                  <tr>
+                    <td>9 ธันวาคม 2565 16:45น.</td>
+                    <td>ย้ายปลา 1 ไป 3</td>
+                  </tr>
+                  <tr>
+                    <td>9 ธันวาคม 2565 16:45น.</td>
+                    <td>ย้ายปลา 1 ไป 3</td>
+                  </tr>
+                  <tr>
+                    <td>9 ธันวาคม 2565 16:45น.</td>
+                    <td>ย้ายปลา 1 ไป 3</td>
+                  </tr>
+                  <tr>
+                    <td>9 ธันวาคม 2565 16:45น.</td>
+                    <td>
+                      <Link
+                        to="/"
+                        className="text-decoration-none text-dark"
+                        style={{ fontWeight: "bolder" }}
+                      >
+                        ย้ายปลา 1 ไป 3
+                      </Link>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -40,16 +68,49 @@ const Home = () => {
               <h4 class="my-0 fw-normal">อันดับกำไรมากสุด/ปี</h4>
             </div>
             <div class="card-body">
-              <ul class="list-unstyled mt-3 mb-4">
-                <li>1. บ่อ 2 กลาง กำไร 589,345 บาท</li>
-                <li>2. บ่อ 3 กลาง กำไร 589,345 บาท</li>
-                <li>3. บ่อ 1 กลาง กำไร 589,345 บาท</li>
-                <li>4. บ่อ 5 กลาง กำไร 589,345 บาท</li>
-                <li>5. บ่อ 4 กลาง กำไร 589,345 บาท</li>
-              </ul>
+              <table className="table">
+                <tbody>
+                  <tr>
+                    <td>1.</td>
+                    <td>
+                      <Link
+                        to="/ponds"
+                        className="text-decoration-none text-dark"
+                        style={{ fontWeight: "bolder" }}
+                      >
+                        บ่อ 2 กลาง
+                      </Link>
+                    </td>
+                    <td>กำไร 589,345 บาท</td>
+                  </tr>
+                  <tr>
+                    <td>2.</td>
+                    <td>บ่อ 3 กลาง</td>
+                    <td>กำไร 589,345 บาท</td>
+                  </tr>
+                  <tr>
+                    <td>3.</td>
+                    <td>บ่อ 1 กลาง</td>
+                    <td>กำไร 589,345 บาท</td>
+                  </tr>
+                  <tr>
+                    <td>4.</td>
+                    <td>บ่อ 5 กลาง</td>
+                    <td>กำไร 589,345 บาท</td>
+                  </tr>
+                  <tr>
+                    <td>5.</td>
+                    <td>บ่อ 4 กลาง</td>
+                    <td>กำไร 589,345 บาท</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
+      </div>
+      <div className="position-absolute bottom-0 end-0 text-muted update">
+        อัปเดทล่าสุด: 9 ธันวาคม 2541
       </div>
     </Fragment>
   );

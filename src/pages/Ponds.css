@@ -1,0 +1,33 @@
+.pond-header {
+  margin-left: 40px;
+  margin-top: 20px;
+  font-size: 44px;
+  margin-bottom: 40px;
+}
+
+.farm-header {
+  font-size: 25px;
+  font-weight: 600;
+}
+
+.margin-pond {
+  margin-top: 40px;
+}
+
+.table-height {
+  line-height: 33px;
+  min-height: 33px;
+  height: 33px;
+}
+
+.table-height-2 {
+  line-height: 60px;
+  min-height: 60px;
+  height: 60px;
+}
+
+.table-height-3 {
+  line-height: 50px;
+  min-height: 50px;
+  height: 50px;
+}

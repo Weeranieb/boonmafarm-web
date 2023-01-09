@@ -8,6 +8,7 @@ import FeedIn from "../pages/FeedIn";
 import DailyFeed from "../pages/DailyFeed";
 import FeedPrice from "../pages/FeedPrice";
 import "./RoutePage.css";
+import OnePond from "../pages/OnePond";
 
 const RoutePage = () => {
   return (
@@ -15,7 +16,7 @@ const RoutePage = () => {
       <div className="space"></div>
       <Switch>
         <Route exact path="/" component={Home} />
-        <Route path="/ponds" component={Ponds} />
+        <Route exact path="/ponds" component={Ponds} />
         <Route path="/history" component={History} />
         <Route path="/stats" component={Stats} />
 
@@ -23,6 +24,7 @@ const RoutePage = () => {
         <Route path="/fillData/daily-feed" component={DailyFeed} />
         <Route path="/fillData/feed-in" component={FeedIn} />
         <Route path="/fillData/feed-price" component={FeedPrice} />
+        <Route path={"/ponds/ศล"} component={OnePond}></Route>
       </Switch>
     </main>
   );
