@@ -24,7 +24,8 @@ const RoutePage = () => {
         <Route path="/fillData/daily-feed" component={DailyFeed} />
         <Route path="/fillData/feed-in" component={FeedIn} />
         <Route path="/fillData/feed-price" component={FeedPrice} />
-        <Route path={"/ponds/ศล"} component={OnePond}></Route>
+        <Route path={"/pondDetail"} component={OnePond}></Route>
+        {/* <Route path={"/ponds/detail"} component={OnePond}></Route> */}
       </Switch>
     </main>
   );

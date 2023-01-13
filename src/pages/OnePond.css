@@ -1,0 +1,39 @@
+.pond-header {
+  padding-left: 40px;
+  font-size: 50px;
+}
+
+.status {
+  margin: auto;
+  font-size: 20px;
+}
+
+.margin-top {
+  margin-top: 20px;
+  font-size: 18px;
+}
+
+.line-height {
+  line-height: 400%;
+}
+
+.chart-header {
+  font-size: 17px;
+  padding-left: 35px;
+  font-weight: 700;
+}
+
+.farm-header {
+  font-size: 40px;
+}
+
+.box-header {
+  font-size: 23px;
+  padding: 5px;
+  font-weight: 600;
+}
+
+.watch-all {
+  font-size: 14px;
+  margin-top: 11px;
+}

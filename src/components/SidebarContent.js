@@ -26,7 +26,9 @@ const SidebarContent = () => {
           <MenuItem routerLink={<Link to="/fillData/daily-feed" />}>
             เหยื่อรายวัน
           </MenuItem>
-          <MenuItem routerLink={<Link to="/fillData/bill" />}>ค่าไฟ</MenuItem>
+          <MenuItem routerLink={<Link to="/fillData/bill" />}>
+            ค่าใช้จ่ายรายเดือน
+          </MenuItem>
           <MenuItem routerLink={<Link to="/fillData/feed-price" />}>
             ราคาเหยื่อ
           </MenuItem>

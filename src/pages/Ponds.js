@@ -50,7 +50,7 @@ const Ponds = () => {
                 <tr className="table-height">
                   <td colSpan="3">
                     <Link
-                      to="/ponds/ศล"
+                      to="/pondDetail"
                       className="text-decoration-none text-dark"
                       style={{ fontWeight: "bolder" }}
                     >
