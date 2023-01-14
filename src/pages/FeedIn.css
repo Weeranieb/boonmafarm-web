@@ -1,0 +1,21 @@
+.header {
+  padding-left: 40px;
+  font-size: 40px;
+}
+
+.content {
+  font-size: 11px;
+}
+
+.tbodyDiv {
+  max-height: clamp(1em, 65vh, 500px);
+  overflow: auto;
+}
+
+.date {
+  font-size: 14px;
+}
+
+.select-date {
+  font-size: 12px;
+}

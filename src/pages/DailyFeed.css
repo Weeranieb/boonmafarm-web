@@ -1,0 +1,37 @@
+.header {
+  padding-left: 40px;
+  font-size: 40px;
+}
+
+.content {
+  font-size: 11px;
+}
+
+.tbodyDiv {
+  max-height: clamp(1em, 65vh, 500px);
+  max-width: clamp(2em, 150vh, 1200px);
+  overflow-y: auto;
+  overflow-x: auto;
+  display: block;
+  white-space: nowrap;
+}
+
+.table-t {
+  border-collapse: collapse;
+  border-spacing: 0;
+  width: 100%;
+}
+
+.date {
+  font-size: 14px;
+  margin-left: 40px;
+  margin-right: 40px;
+}
+
+.select-date {
+  font-size: 12px;
+}
+
+td {
+  padding: 10px;
+}

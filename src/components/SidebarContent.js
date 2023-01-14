@@ -20,6 +20,9 @@ const SidebarContent = () => {
           บ่อปลา
         </MenuItem>
         <SubMenu label="กรอกข้อมูล" icon={<i class="fa-solid fa-table"></i>}>
+          <MenuItem routerLink={<Link to="/fillData/activity" />}>
+            ลง-ย้าย-ขาย
+          </MenuItem>
           <MenuItem routerLink={<Link to="/fillData/feed-in" />}>
             เหยื่อเข้า
           </MenuItem>
@@ -31,6 +34,9 @@ const SidebarContent = () => {
           </MenuItem>
           <MenuItem routerLink={<Link to="/fillData/feed-price" />}>
             ราคาเหยื่อ
+          </MenuItem>
+          <MenuItem routerLink={<Link to="/fillData/upload" />}>
+            อัปโหลด
           </MenuItem>
         </SubMenu>
         <MenuItem
