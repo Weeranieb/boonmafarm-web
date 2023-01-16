@@ -1,10 +1,17 @@
+import "./General.css";
+
 const SearchDate = () => {
   return (
     <div>
       <label for="month" className="me-3">
         เดือน
       </label>
-      <select name="month" id="month">
+      <select
+        name="month"
+        id="month"
+        className="form-select form-select-sm"
+        style={{ width: "100px" }}
+      >
         <option value="JAN" selected="selected">
           มกราคม
         </option>
@@ -23,7 +30,12 @@ const SearchDate = () => {
       <label for="year" className="ms-4 me-3">
         ปี
       </label>
-      <select name="year" id="year">
+      <select
+        name="year"
+        id="year"
+        className="form-select form-select-sm"
+        style={{ width: "90px" }}
+      >
         <option value="2016">2559</option>
         <option value="2017">2560</option>
         <option value="2018">2561</option>
@@ -36,8 +48,8 @@ const SearchDate = () => {
         </option>
       </select>
       <button
-        className="ms-4 btn btn-primary"
-        style={{ position: "relative", bottom: "5px", fontSize: "13px" }}
+        className="ms-4 btn btn-primary btn-sm"
+        style={{ fontSize: "13px" }}
       >
         ค้นหา
       </button>

@@ -10,6 +10,7 @@ const TableDailyFeed = (props) => {
           name={props.input_by_pu}
           id={props.input_by_pu}
           form={props.form_id}
+          className="text-end"
         />
       </td>
     );

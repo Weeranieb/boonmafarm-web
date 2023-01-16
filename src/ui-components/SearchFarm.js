@@ -1,10 +1,15 @@
 const SearchFarm = () => {
   return (
-    <div>
+    <div style={{ position: "relative", right: "10px" }}>
       <label for="month" className="me-3">
         เดือน
       </label>
-      <select name="month" id="month">
+      <select
+        name="month"
+        id="month"
+        className="form-select form-select-sm"
+        style={{ width: "100px" }}
+      >
         <option value="JAN" selected="selected">
           มกราคม
         </option>
@@ -23,7 +28,12 @@ const SearchFarm = () => {
       <label for="year" className="ms-4 me-3">
         ปี
       </label>
-      <select name="year" id="year">
+      <select
+        name="year"
+        id="year"
+        className="form-select form-select-sm"
+        style={{ width: "100px" }}
+      >
         <option value="2016">2559</option>
         <option value="2017">2560</option>
         <option value="2018">2561</option>
@@ -38,7 +48,12 @@ const SearchFarm = () => {
       <label for="farm" className="ms-4 me-3">
         ฟาร์ม
       </label>
-      <select name="farm" id="farm">
+      <select
+        name="farm"
+        id="farm"
+        className="form-select form-select-sm"
+        style={{ width: "100px" }}
+      >
         <option value="farm_1" selected="selected">
           ฟาร์ม 1
         </option>
@@ -46,8 +61,8 @@ const SearchFarm = () => {
         <option value="farm_4">ฟาร์ม 4</option>
       </select>
       <button
-        className="ms-4 btn btn-primary"
-        style={{ position: "relative", bottom: "5px", fontSize: "13px" }}
+        className="ms-4 btn btn-primary btn-sm"
+        style={{ fontSize: "13px" }}
       >
         ค้นหา
       </button>

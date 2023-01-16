@@ -1,5 +1,11 @@
+import "./Activity.css";
 const Activity = () => {
-  return <h1>Activity</h1>;
+  return (
+    <div>
+      <div className="header">กิจกรรมบ่อปลา</div>
+      <hr />
+    </div>
+  );
 };
 
 export default Activity;

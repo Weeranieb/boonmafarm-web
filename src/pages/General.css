@@ -1,0 +1,12 @@
+select.form-select {
+  display: inline-block;
+}
+
+input.form-control {
+  display: inline-block;
+}
+
+.header {
+  padding-left: 40px;
+  font-size: 40px;
+}

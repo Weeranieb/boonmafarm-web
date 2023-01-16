@@ -7,7 +7,9 @@ const DailyFeed = () => {
       <div className="header">เหยื่อรายวัน</div>
       <hr />
       <div className="text-end select-date">
-        <SearchFarm />
+        <form action="#!">
+          <SearchFarm />
+        </form>
       </div>
       <form action="#!" id="feed_in_form"></form>
       <div class="table-responsive tbodyDiv">
