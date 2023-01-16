@@ -8,14 +8,14 @@ const FeedPrice = () => {
     <div>
       <div className="header">ราคาเหยื่อ</div>
       <hr />
-      <div className="text-start select-date ms-4">
-        <form action="#!">
-          <SearchFeedType />
-        </form>
-      </div>
-      <div style={{ height: "40px" }}></div>
+
       <div className="row">
         <div className="col-6">
+          <div className="text-start select-date ms-4 mb-4">
+            <form action="#!">
+              <SearchFeedType />
+            </form>
+          </div>
           <div className="edit-header mb-4">เพิ่ม/แก้ไขราคาเหยื่อ</div>
           <div className="input">
             <form action="#!" id="feed_price"></form>

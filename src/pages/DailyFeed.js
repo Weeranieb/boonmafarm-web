@@ -1,4 +1,4 @@
-import SearchFarm from "../ui-components/SearchFarm";
+import SearchFarm from "../ui-components/SearchFarmWithDate";
 import TableDailyFeed from "../ui-components/TableDailyFeed";
 import "./DailyFeed.css";
 const DailyFeed = () => {

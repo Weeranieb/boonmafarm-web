@@ -1,4 +1,11 @@
-.header {
-  padding-left: 40px;
-  font-size: 40px;
+.edit-header {
+  font-size: 26px;
+  font-weight: 500;
+  position: relative;
+  left: 20px;
+}
+
+.input {
+  position: relative;
+  left: 50px;
 }

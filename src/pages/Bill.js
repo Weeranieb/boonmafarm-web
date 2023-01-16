@@ -5,41 +5,42 @@ const Bill = () => {
     <div>
       <div className="bill-header">ค่าใช้จ่ายรายเดือน</div>
       <div className="ms-5 bill-content mt-4">
-        <form action="#!">
-          <div className="mb-3">
-            <SearchDate />
-          </div>
-        </form>
         <hr />
         <div className="row">
           <div className="col-6">
             <div className="me-4">
-              <form action="#!">
-                <label for="electricity_bill" className="me-3">
-                  ค่าไฟ:
-                </label>
-                <input
-                  type="text"
-                  name="electricity_bill"
-                  id="electricity_bill"
-                  inputmode="numeric"
-                  className="form-control form-control-sm"
-                  style={{ width: "100px" }}
-                />
-                <br />
-                <br />
-                <label for="worker_salary" className="me-3">
-                  ค่าแรงลูกน้อง:
-                </label>
-                <input
-                  type="text"
-                  name="worker_salary"
-                  id="worker_salary"
-                  inputmode="numeric"
-                  className="form-control form-control-sm"
-                  style={{ width: "100px" }}
-                />
-              </form>
+              <div className="mb-4">
+                <span className="fs-3">กรอกค่าใช้จ่าย</span>
+              </div>
+
+              <div>
+                <form action="#!">
+                  <label for="electricity_bill" className="me-3">
+                    ค่าไฟ:
+                  </label>
+                  <input
+                    type="text"
+                    name="electricity_bill"
+                    id="electricity_bill"
+                    inputmode="numeric"
+                    className="form-control form-control-sm"
+                    style={{ width: "100px" }}
+                  />
+                  <br />
+                  <br />
+                  <label for="worker_salary" className="me-3">
+                    ค่าแรงลูกน้อง:
+                  </label>
+                  <input
+                    type="text"
+                    name="worker_salary"
+                    id="worker_salary"
+                    inputmode="numeric"
+                    className="form-control form-control-sm"
+                    style={{ width: "100px" }}
+                  />
+                </form>
+              </div>
             </div>
             <button
               className="btn btn-primary btn-sm"
@@ -54,6 +55,13 @@ const Bill = () => {
             </button>
           </div>
           <div className="col">
+            <div className="text-end">
+              <form action="#!">
+                <div className="mb-4">
+                  <SearchDate />
+                </div>
+              </form>
+            </div>
             <div className="border border-2 rounded rounded-3 p-2 justify-content-between">
               <div class="d-flex justify-content-between">
                 <div className="box-header">ประวัติราคา</div>
