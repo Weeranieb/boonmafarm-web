@@ -1,4 +1,4 @@
-const SearchFarm = () => {
+const SearchFarmWithDate = () => {
   return (
     <div style={{ position: "relative", right: "10px" }}>
       <label for="month" className="me-3">
@@ -70,6 +70,6 @@ const SearchFarm = () => {
   );
 };
 
-export default SearchFarm;
+export default SearchFarmWithDate;
 
 // in the future use function to run from 1. to 12. and use current date if yes selected="selected" no selected=""
