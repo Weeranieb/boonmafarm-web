@@ -6,9 +6,9 @@ const Ponds = () => {
   return (
     <Fragment>
       <div className="pond-header">บ่อปลาทั้งหมด</div>
-      <div class="container">
-        <div class="row">
-          <div class="col-sm text-center">
+      <div className="container">
+        <div className="row">
+          <div className="col-sm text-center">
             <span className="farm-header text-dark">ฟาร์ม 1</span>
             <table className="table margin-pond table-borderless">
               <tbody>
@@ -61,7 +61,7 @@ const Ponds = () => {
               </tbody>
             </table>
           </div>
-          <div class="col-sm text-center">
+          <div className="col-sm text-center">
             <span className="farm-header text-dark">ฟาร์ม 2</span>
             <table className="table margin-pond table-borderless">
               <tbody>
@@ -84,7 +84,7 @@ const Ponds = () => {
               </tbody>
             </table>
           </div>
-          <div class="col-sm text-center">
+          <div className="col-sm text-center">
             <span className="farm-header text-dark">ฟาร์ม 4</span>
             <table className="table margin-pond table-borderless">
               <tbody>

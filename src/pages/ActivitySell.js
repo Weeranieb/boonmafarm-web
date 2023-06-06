@@ -5,7 +5,7 @@ import "./Activity.css";
 import "./General.css";
 import TableRows from "../components/TableRows";
 
-const Activity2 = () => {
+const ActivitySell = () => {
   const [rows, initRow] = useState([]);
   const addRowTable = () => {
     const data = {
@@ -135,7 +135,7 @@ const Activity2 = () => {
             </form>
           </div>
           <div className="border border-2 rounded rounded-3 p-2 justify-content-between">
-            <div class="d-flex justify-content-between p-3">
+            <div className="d-flex justify-content-between p-3">
               <div className="box-header">กิจกรรมล่าสุด</div>
               <div className="text-primary watch-all">ดูทั้งหมด</div>
             </div>
@@ -180,4 +180,4 @@ const Activity2 = () => {
   );
 };
 
-export default Activity2;
+export default ActivitySell;

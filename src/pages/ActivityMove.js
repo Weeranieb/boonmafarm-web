@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import "./Activity.css";
 import "./General.css";
 
-const Activity1 = () => {
+const ActivityMove = () => {
   return (
     <div>
       <div className="header">กิจกรรมบ่อ 3/2</div>
@@ -136,7 +136,7 @@ const Activity1 = () => {
             </form>
           </div>
           <div className="border border-2 rounded rounded-3 p-2 justify-content-between">
-            <div class="d-flex justify-content-between p-3">
+            <div className="d-flex justify-content-between p-3">
               <div className="box-header">กิจกรรมล่าสุด</div>
               <div className="text-primary watch-all">ดูทั้งหมด</div>
             </div>
@@ -181,4 +181,4 @@ const Activity1 = () => {
   );
 };
 
-export default Activity1;
+export default ActivityMove;

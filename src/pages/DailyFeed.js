@@ -12,7 +12,7 @@ const DailyFeed = () => {
         </form>
       </div>
       <form action="#!" id="feed_in_form"></form>
-      <div class="table-responsive tbodyDiv">
+      <div className="table-responsive tbodyDiv">
         <table className="text-center table table-striped" width="100%">
           <thead className="text-dark fw-bold">
             <td>วัน</td>

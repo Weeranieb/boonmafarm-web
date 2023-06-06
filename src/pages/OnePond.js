@@ -3,7 +3,7 @@ const OnePond = () => {
   return (
     <div className="container">
       <div className="row">
-        <div class="col-8">
+        <div className="col-8">
           <div className="container">
             <div className="row">
               <div className="col text-center" style={{ fontSize: "35px" }}>
@@ -45,7 +45,7 @@ const OnePond = () => {
           <div style={{ height: "40px" }}></div>
           <div className="chart-header">
             เลือกกราฟ:
-            <span class="border border-dark p-1 ms-4">
+            <span className="border border-dark p-1 ms-4">
               เปรียบเทียบต้นทุนทั้งหมด
             </span>
           </div>
@@ -59,13 +59,13 @@ const OnePond = () => {
             />
           </div>
         </div>
-        <div class="col">
+        <div className="col">
           <div className="text-center farm-header text-dark mb-4">ฟาร์ม 2</div>
           <div
             className="border border-2 rounded rounded-3 p-2 justify-content-between"
             style={{ height: "270px" }}
           >
-            <div class="d-flex justify-content-between">
+            <div className="d-flex justify-content-between">
               <div className="box-header">กิจกรรมล่าสุด</div>
               <div className="text-primary watch-all">ดูทั้งหมด</div>
             </div>
@@ -98,7 +98,7 @@ const OnePond = () => {
             className="border border-2 round rounded-3 p-2 mt-3"
             style={{ height: "270px" }}
           >
-            <div class="d-flex justify-content-between">
+            <div className="d-flex justify-content-between">
               <div className="box-header">ประวัติบ่อ</div>
               <div className="text-primary watch-all">ดูทั้งหมด</div>
             </div>

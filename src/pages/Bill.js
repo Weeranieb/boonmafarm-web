@@ -63,7 +63,7 @@ const Bill = () => {
               </form>
             </div>
             <div className="border border-2 rounded rounded-3 p-2 justify-content-between">
-              <div class="d-flex justify-content-between">
+              <div className="d-flex justify-content-between">
                 <div className="box-header">ประวัติราคา</div>
                 <div className="text-primary watch-all">ดูทั้งหมด</div>
               </div>

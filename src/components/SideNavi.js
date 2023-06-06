@@ -21,21 +21,21 @@ const SideNavi = () => {
       <Nav defaultSelectd="home">
         <NavItem eventKey="หน้าแรก">
           <NavIcon>
-            <i class="fa-sharp fa-solid fa-house"></i>
+            <i className="fa-sharp fa-solid fa-house"></i>
           </NavIcon>
           <NavText>หน้าแรก</NavText>
         </NavItem>
 
         <NavItem eventKey="บ่อปลา">
           <NavIcon>
-            <i class="fa-sharp fa-solid fa-fish"></i>
+            <i className="fa-sharp fa-solid fa-fish"></i>
           </NavIcon>
           <NavText>บ่อปลา</NavText>
         </NavItem>
 
         <NavItem eventKey="กรอกข้อมูล">
           <NavIcon>
-            <i class="fa-sharp fa-solid fa-table"></i>
+            <i className="fa-sharp fa-solid fa-table"></i>
           </NavIcon>
           <NavText>กรอกข้อมูล</NavText>
           <NavItem>
@@ -54,14 +54,14 @@ const SideNavi = () => {
 
         <NavItem eventKey="สถิติ">
           <NavIcon>
-            <i class="fa-sharp fa-solid fa-chart-simple"></i>
+            <i className="fa-sharp fa-solid fa-chart-simple"></i>
           </NavIcon>
           <NavText>สถิติ</NavText>
         </NavItem>
 
         <NavItem eventKey="ประวัติ">
           <NavIcon>
-            <i class="fa-sharp fa-solid fa-clock-rotate-left"></i>
+            <i className="fa-sharp fa-solid fa-clock-rotate-left"></i>
           </NavIcon>
           <NavText>ประวัติ</NavText>
         </NavItem>

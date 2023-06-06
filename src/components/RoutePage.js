@@ -10,7 +10,9 @@ import FeedPrice from "../pages/FeedPrice";
 import "./RoutePage.css";
 import OnePond from "../pages/OnePond";
 import Upload from "../pages/Upload";
-import Activity1 from "../pages/Activity2";
+import ActivityFill from "../pages/ActivityFill";
+import ActivityMove from "../pages/ActivityMove";
+import ActivitySell from "../pages/ActivitySell";
 
 const RoutePage = () => {
   return (
@@ -28,7 +30,9 @@ const RoutePage = () => {
         <Route path="/fillData/feed-price" component={FeedPrice} />
         <Route path={"/pondDetail"} component={OnePond}></Route>
         <Route path={"/fillData/upload"} component={Upload}></Route>
-        <Route path={"/fillData/activity"} component={Activity1}></Route>
+        <Route path={"/fillData/fill"} component={ActivityFill}></Route>
+        <Route path={"/fillData/move"} component={ActivityMove}></Route>
+        <Route path={"/fillData/sell"} component={ActivitySell}></Route>
         {/* <Route path={"/ponds/detail"} component={OnePond}></Route> */}
       </Switch>
     </main>

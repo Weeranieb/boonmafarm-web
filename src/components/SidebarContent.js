@@ -8,18 +8,21 @@ const SidebarContent = () => {
       <SidebarHeader />
       <Menu>
         <MenuItem
-          icon={<i class="fa-solid fa-house-chimney"></i>}
+          icon={<i className="fa-solid fa-house-chimney"></i>}
           routerLink={<Link to="/" />}
         >
           หน้าแรก
         </MenuItem>
         <MenuItem
-          icon={<i class="fa-solid fa-fish-fins"></i>}
+          icon={<i className="fa-solid fa-fish-fins"></i>}
           routerLink={<Link to="/ponds" />}
         >
           บ่อปลา
         </MenuItem>
-        <SubMenu label="กรอกข้อมูล" icon={<i class="fa-solid fa-table"></i>}>
+        <SubMenu
+          label="กรอกข้อมูล"
+          icon={<i className="fa-solid fa-table"></i>}
+        >
           <MenuItem routerLink={<Link to="/fillData/activity" />}>
             ลง-ย้าย-ขาย
           </MenuItem>
@@ -40,13 +43,13 @@ const SidebarContent = () => {
           </MenuItem>
         </SubMenu>
         <MenuItem
-          icon={<i class="fa-solid fa-chart-simple"></i>}
+          icon={<i className="fa-solid fa-chart-simple"></i>}
           routerLink={<Link to="/stats" />}
         >
           สถิติ
         </MenuItem>
         <MenuItem
-          icon={<i class="fa-solid fa-clock-rotate-left"></i>}
+          icon={<i className="fa-solid fa-clock-rotate-left"></i>}
           routerLink={<Link to="/history" />}
         >
           ประวัติ
