@@ -1,7 +1,8 @@
-const SearchFarmWithDate = () => {
+const SearchFarmWithDate = (props) => {
+  console.log(props);
   return (
     <div style={{ position: "relative", right: "10px" }}>
-      <label for="month" className="me-3">
+      <label htmlFor="month" className="me-3">
         เดือน
       </label>
       <select
@@ -9,23 +10,23 @@ const SearchFarmWithDate = () => {
         id="month"
         className="form-select form-select-sm"
         style={{ width: "100px" }}
+        onChange={props.onChange}
+        value={props.month}
       >
-        <option value="JAN" selected="selected">
-          มกราคม
-        </option>
-        <option value="FEB">กุมภาพันธ์</option>
-        <option value="MAR">มีนาคม</option>
-        <option value="APR">เมษายน</option>
-        <option value="MAY">พฤษภาคม</option>
-        <option value="JUN">มิถุนายน</option>
-        <option value="JUL">กรกฎาคม</option>
-        <option value="AUG">สิงหาคม</option>
-        <option value="SEP">กันยายน</option>
-        <option value="OCT">ตุลาคม</option>
-        <option value="NOV">พฤศจิกายน</option>
-        <option value="DEC">ธันวาคม</option>
+        <option value="1">มกราคม</option>
+        <option value="2">กุมภาพันธ์</option>
+        <option value="3">มีนาคม</option>
+        <option value="4">เมษายน</option>
+        <option value="5">พฤษภาคม</option>
+        <option value="6">มิถุนายน</option>
+        <option value="7">กรกฎาคม</option>
+        <option value="8">สิงหาคม</option>
+        <option value="9">กันยายน</option>
+        <option value="10">ตุลาคม</option>
+        <option value="11">พฤศจิกายน</option>
+        <option value="12">ธันวาคม</option>
       </select>
-      <label for="year" className="ms-4 me-3">
+      <label htmlFor="year" className="ms-4 me-3">
         ปี
       </label>
       <select
@@ -33,6 +34,8 @@ const SearchFarmWithDate = () => {
         id="year"
         className="form-select form-select-sm"
         style={{ width: "100px" }}
+        onChange={props.onChange}
+        value={props.year}
       >
         <option value="2016">2559</option>
         <option value="2017">2560</option>
@@ -41,11 +44,12 @@ const SearchFarmWithDate = () => {
         <option value="2020">2563</option>
         <option value="2021">2564</option>
         <option value="2022">2565</option>
-        <option value="2023" selected="selected">
-          2566
-        </option>
+        <option value="2023">2566</option>
+        <option value="2024">2567</option>
+        <option value="2025">2568</option>
+        <option value="2026">2569</option>
       </select>
-      <label for="farm" className="ms-4 me-3">
+      <label htmlFor="farm" className="ms-4 me-3">
         ฟาร์ม
       </label>
       <select
@@ -53,12 +57,12 @@ const SearchFarmWithDate = () => {
         id="farm"
         className="form-select form-select-sm"
         style={{ width: "100px" }}
+        onChange={props.onChange}
+        value={props.farm}
       >
-        <option value="farm_1" selected="selected">
-          ฟาร์ม 1
-        </option>
-        <option value="farm_2">ฟาร์ม 2</option>
-        <option value="farm_4">ฟาร์ม 4</option>
+        <option value="ฟาร์ม 1">ฟาร์ม 1</option>
+        <option value="ฟาร์ม 2">ฟาร์ม 2</option>
+        <option value="ฟาร์ม 4">ฟาร์ม 4</option>
       </select>
       <button
         className="ms-4 btn btn-primary btn-sm"
@@ -71,5 +75,3 @@ const SearchFarmWithDate = () => {
 };
 
 export default SearchFarmWithDate;
-
-// in the future use function to run from 1. to 12. and use current date if yes selected="selected" no selected=""

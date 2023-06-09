@@ -23,7 +23,7 @@ const SidebarContent = () => {
           label="กรอกข้อมูล"
           icon={<i className="fa-solid fa-table"></i>}
         >
-          <MenuItem routerLink={<Link to="/fillData/activity" />}>
+          <MenuItem routerLink={<Link to="/fillData/fill" />}>
             ลง-ย้าย-ขาย
           </MenuItem>
           <MenuItem routerLink={<Link to="/fillData/feed-in" />}>

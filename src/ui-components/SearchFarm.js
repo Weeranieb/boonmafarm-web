@@ -1,7 +1,7 @@
 const SearchFarm = () => {
   return (
     <div style={{ position: "relative", right: "10px" }}>
-      <label for="farm" className="ms-4 me-3">
+      <label htmlFor="farm" className="ms-4 me-3">
         ฟาร์ม
       </label>
       <select
@@ -16,7 +16,7 @@ const SearchFarm = () => {
         <option value="farm_2">ฟาร์ม 2</option>
         <option value="farm_4">ฟาร์ม 4</option>
       </select>
-      <label for="pond" className="ms-4 me-3">
+      <label htmlFor="pond" className="ms-4 me-3">
         บ่อ
       </label>
       <select

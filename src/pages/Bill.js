@@ -15,27 +15,27 @@ const Bill = () => {
 
               <div>
                 <form action="#!">
-                  <label for="electricity_bill" className="me-3">
+                  <label htmlFor="electricity_bill" className="me-3">
                     ค่าไฟ:
                   </label>
                   <input
                     type="text"
                     name="electricity_bill"
                     id="electricity_bill"
-                    inputmode="numeric"
+                    inputMode="numeric"
                     className="form-control form-control-sm"
                     style={{ width: "100px" }}
                   />
                   <br />
                   <br />
-                  <label for="worker_salary" className="me-3">
+                  <label htmlFor="worker_salary" className="me-3">
                     ค่าแรงลูกน้อง:
                   </label>
                   <input
                     type="text"
                     name="worker_salary"
                     id="worker_salary"
-                    inputmode="numeric"
+                    inputMode="numeric"
                     className="form-control form-control-sm"
                     style={{ width: "100px" }}
                   />

@@ -1,8 +1,63 @@
 import "./Ponds.css";
-import { Fragment } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { fetchData } from "../utils/fetch";
+import { swappedPondNameMap } from "../utils/pond";
 
 const Ponds = () => {
+  const linkMap = new Map();
+  const [pondData, setPondData] = useState([]);
+
+  useEffect(() => {
+    const headers = new Headers();
+    headers.append("Content-Type", "application/json");
+
+    const requestOptions = {
+      method: "GET",
+      headers: headers,
+    };
+
+    fetchData(
+      `${process.env.REACT_APP_BACKEND}/api/v1/master/getListOfPonds`,
+      requestOptions
+    ).then((result) => {
+      if (result) {
+        setPondData(result);
+      }
+    });
+  }, []);
+
+  console.log(pondData);
+
+  for (const pond of pondData) {
+    const pondName = swappedPondNameMap.get(pond.pond_name);
+    let state, pathName;
+    if (pond.active_pond_id === -1) {
+      pathName = "/fillData/fill";
+      state = {
+        pond_id: pond.pond_id,
+        pond_name: pond.pond_name,
+      };
+    } else {
+      pathName = "/pondDetail";
+      state = {
+        active_pond_id: pond.active_pond_id,
+      };
+    }
+    linkMap.set(
+      pondName,
+      <Link
+        to={{ pathname: pathName, state }}
+        className="text-decoration-none text-dark"
+        style={{ fontWeight: "bolder" }}
+      >
+        {pondName}
+      </Link>
+    );
+  }
+
+  console.log(linkMap);
+
   return (
     <Fragment>
       <div className="pond-header">บ่อปลาทั้งหมด</div>
@@ -13,50 +68,43 @@ const Ponds = () => {
             <table className="table margin-pond table-borderless">
               <tbody>
                 <tr className="table-height">
-                  <td>1 ซ้าย</td>
-                  <td>1 กลาง</td>
-                  <td>1 ขวา</td>
+                  <td>{linkMap.get("1 ซ้าย")}</td>
+                  <td>{linkMap.get("1 กลาง")}</td>
+                  <td>{linkMap.get("1 ขวา")}</td>
                 </tr>
                 <tr className="table-height">
-                  <td>2 ซ้าย</td>
-                  <td>2 กลาง</td>
-                  <td>2 ขวา</td>
+                  <td>{linkMap.get("2 ซ้าย")}</td>
+                  <td>{linkMap.get("2 กลาง")}</td>
+                  <td>{linkMap.get("2 ขวา")}</td>
                 </tr>
                 <tr className="table-height">
-                  <td>3 ซ้าย</td>
-                  <td>3 กลาง</td>
-                  <td>3 ขวา</td>
+                  <td>{linkMap.get("3 ซ้าย")}</td>
+                  <td>{linkMap.get("3 กลาง")}</td>
+                  <td>{linkMap.get("3 ขวา")}</td>
                 </tr>
                 <tr className="table-height">
-                  <td>4 ซ้าย</td>
-                  <td>4 กลาง</td>
-                  <td>4 ขวา</td>
+                  <td>{linkMap.get("4 ซ้าย")}</td>
+                  <td>{linkMap.get("4 กลาง")}</td>
+                  <td>{linkMap.get("4 ขวา")}</td>
                 </tr>
                 <tr className="table-height">
-                  <td>5 ซ้าย</td>
-                  <td>5 กลาง</td>
-                  <td>5 ขวา</td>
+                  <td>{linkMap.get("5 ซ้าย")}</td>
+                  <td>{linkMap.get("5 กลาง")}</td>
+                  <td>{linkMap.get("5 ขวา")}</td>
                 </tr>
                 <tr className="table-height">
-                  <td>6 ซ้าย</td>
-                  <td>พักน้ำ</td>
-                  <td>6 ขวา</td>
+                  <td>{linkMap.get("6 ซ้าย")}</td>
+                  <td>{linkMap.get("พักน้ำ")}</td>
+                  <td>{linkMap.get("6 ขวา")}</td>
                 </tr>
                 <tr className="table-height">
-                  <td>ศญ</td>
-                  <td>หลังครัว</td>
-                  <td>7 ขวา</td>
+                  <td>{linkMap.get("ศญ")}</td>
+                  <td>{linkMap.get("หลังครัว")}</td>
+                  <td>{linkMap.get("7 ขวา")}</td>
                 </tr>
                 <tr className="table-height">
-                  <td colSpan="3">
-                    <Link
-                      to="/pondDetail"
-                      className="text-decoration-none text-dark"
-                      style={{ fontWeight: "bolder" }}
-                    >
-                      ศล
-                    </Link>
-                  </td>
+                  <td colSpan="1">{linkMap.get("ศล")}</td>
+                  <td colSpan="1">{linkMap.get("สนาม")}</td>
                 </tr>
               </tbody>
             </table>
@@ -66,20 +114,20 @@ const Ponds = () => {
             <table className="table margin-pond table-borderless">
               <tbody>
                 <tr className="table-height-2">
-                  <td>1/1/2</td>
-                  <td>1/2</td>
+                  <td>{linkMap.get("1/1/2")}</td>
+                  <td>{linkMap.get("1/2")}</td>
                 </tr>
                 <tr className="table-height-2">
-                  <td>2/2</td>
-                  <td>3/2</td>
+                  <td>{linkMap.get("2/2")}</td>
+                  <td>{linkMap.get("3/2")}</td>
                 </tr>
                 <tr className="table-height-2">
-                  <td>4/2</td>
-                  <td>5/2</td>
+                  <td>{linkMap.get("4/2")}</td>
+                  <td>{linkMap.get("5/2")}</td>
                 </tr>
                 <tr className="table-height-2">
-                  <td>6/2</td>
-                  <td>7/2</td>
+                  <td>{linkMap.get("6/2")}</td>
+                  <td>{linkMap.get("7/2")}</td>
                 </tr>
               </tbody>
             </table>
@@ -89,24 +137,24 @@ const Ponds = () => {
             <table className="table margin-pond table-borderless">
               <tbody>
                 <tr className="table-height-3">
-                  <td>1/4</td>
-                  <td>2/4</td>
+                  <td>{linkMap.get("1/4")}</td>
+                  <td>{linkMap.get("2/4")}</td>
                 </tr>
                 <tr className="table-height-3">
-                  <td>3/4</td>
-                  <td>4/4</td>
+                  <td>{linkMap.get("3/4")}</td>
+                  <td>{linkMap.get("4/4")}</td>
                 </tr>
                 <tr className="table-height-3">
-                  <td>5/4</td>
-                  <td>6/4</td>
+                  <td>{linkMap.get("5/4")}</td>
+                  <td>{linkMap.get("6/4")}</td>
                 </tr>
                 <tr className="table-height-3">
-                  <td>7/4</td>
-                  <td>8/4</td>
+                  <td>{linkMap.get("7/4")}</td>
+                  <td>{linkMap.get("8/4")}</td>
                 </tr>
                 <tr className="table-height-3">
-                  <td>13/1</td>
-                  <td>13/2</td>
+                  <td>{linkMap.get("13/1")}</td>
+                  <td>{linkMap.get("13/2")}</td>
                 </tr>
               </tbody>
             </table>

@@ -2,7 +2,7 @@ import "./General.css";
 const SearchFeedType = () => {
   return (
     <div style={{ fontSize: "15px" }}>
-      <label for="feed_type" className="me-3">
+      <label htmlFor="feed_type" className="me-3">
         ประเภทเหยื่อ
       </label>
       <select
@@ -16,7 +16,7 @@ const SearchFeedType = () => {
         </option>
         <option value="pro_feed">โปรฟีด</option>
       </select>
-      <label for="vendor" className="ms-4 me-3">
+      <label htmlFor="vendor" className="ms-4 me-3">
         คนขายเหยื่อ
       </label>
       <select

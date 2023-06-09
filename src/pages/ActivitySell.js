@@ -52,7 +52,7 @@ const ActivitySell = () => {
               <tbody>
                 <tr>
                   <td className="text-end pe-4">
-                    <label for="date">วันที่ลงปลา:</label>
+                    <label htmlFor="date">วันที่ลงปลา:</label>
                   </td>
                   <td className="text-start">
                     <input

@@ -1,12 +1,13 @@
 import { Fragment, useEffect, useState } from "react";
 import "./Home.css";
+import { fetchData } from "../utils/fetch";
 import { Link } from "react-router-dom";
 
 const Home = () => {
   const [lastUpdate, setLastUpdate] = useState("");
   const [latestActivities, setLatestActivities] = useState([]);
   const [profits, setProfits] = useState([]);
-  const [error, setError] = useState(null);
+  // const [error, setError] = useState(null);
 
   useEffect(() => {
     const headers = new Headers();
@@ -17,22 +18,9 @@ const Home = () => {
       headers: headers,
     };
 
-    const fetchData = async (url) => {
-      try {
-        const response = await fetch(url, requestOptions);
-        if (!response.ok) {
-          throw new Error("Network response was not ok.");
-        }
-        const data = await response.json();
-        return data.result;
-      } catch (error) {
-        setError(error);
-        return null;
-      }
-    };
-
     fetchData(
-      `${process.env.REACT_APP_BACKEND}/api/v1/activity/getLatestUpdate`
+      `${process.env.REACT_APP_BACKEND}/api/v1/activity/getLatestUpdate`,
+      requestOptions
     ).then((result) => {
       if (result) {
         setLastUpdate(result);
@@ -40,7 +28,8 @@ const Home = () => {
     });
 
     fetchData(
-      `${process.env.REACT_APP_BACKEND}/api/v1/activity/getLatestActivity`
+      `${process.env.REACT_APP_BACKEND}/api/v1/activity/getLatestActivity`,
+      requestOptions
     ).then((result) => {
       if (result) {
         setLatestActivities(result);
@@ -48,7 +37,8 @@ const Home = () => {
     });
 
     fetchData(
-      `${process.env.REACT_APP_BACKEND}/api/v1/master/getTopYearlyProfit`
+      `${process.env.REACT_APP_BACKEND}/api/v1/master/getTopYearlyProfit`,
+      requestOptions
     ).then((result) => {
       if (result) {
         setProfits(result);
@@ -56,10 +46,10 @@ const Home = () => {
     });
   }, []);
 
-  if (error) {
-    // Handle the error here, e.g., display an error message
-    return <div>Error: {error.message}</div>;
-  }
+  // if (error) {
+  //   // Handle the error here, e.g., display an error message
+  //   return <div>Error: {error.message}</div>;
+  // }
 
   // const routeMap = new Map(
   //   ["fill", "fillIn"],
@@ -147,13 +137,14 @@ const Home = () => {
                         <td>{`${index + 1}.`}</td>
                         <td style={{ verticalAlign: "middle" }}>
                           <Link
-                            key={index}
-                            to="/pondDetail"
+                            to={{
+                              pathname: "/pondDetail",
+                              state: {
+                                active_pond_id: profit.active_pond_id,
+                              },
+                            }}
                             className="text-decoration-none text-dark"
                             style={{ fontWeight: "bolder" }}
-                            state={{
-                              active_pond_id: profit.active_pond_id,
-                            }}
                           >
                             {profit.pond_name}
                           </Link>
@@ -170,9 +161,9 @@ const Home = () => {
           </div>
         </div>
       </div>
-      <div className="position-absolute bottom-0 end-0 text-muted update">
+      {/* <div className="position-absolute bottom-0 end-0 text-muted update">
         อัปเดทล่าสุด: 9 ธันวาคม 2541
-      </div>
+      </div> */}
     </Fragment>
   );
 };

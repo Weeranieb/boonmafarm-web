@@ -1,26 +1,38 @@
 const TableDailyFeed = (props) => {
+  const keys = [];
   let rows = [];
-  for (let i = 0; i < 22; i++) {
+  for (const [index, day] of props.dates.entries()) {
+    let row = [];
+    for (let pond of props.pondList) {
+      let key = `${index + 1}_${pond.name}`;
+      keys.push(key);
+      let data = props.feedData[key];
+      row.push(
+        <td key={key}>
+          <input
+            type="number"
+            inputMode="numeric"
+            style={{ width: "33px" }}
+            name={key}
+            id={key}
+            form={props.form_id}
+            className="text-end"
+            value={data}
+            onChange={props.onChange}
+          />
+        </td>
+      );
+    }
+
     rows.push(
-      <td>
-        <input
-          type="text"
-          inputmode="numeric"
-          style={{ width: "33px" }}
-          name={props.input_by_pu}
-          id={props.input_by_pu}
-          form={props.form_id}
-          className="text-end"
-        />
-      </td>
+      <tr>
+        <td style={{ fontSize: "14px" }}>{day}</td>
+        {row}
+      </tr>
     );
   }
-  return (
-    <tr>
-      <td style={{ fontSize: "14px" }}>{props.date}</td>
-      {rows}
-    </tr>
-  );
+
+  return rows;
 };
 
 export default TableDailyFeed;

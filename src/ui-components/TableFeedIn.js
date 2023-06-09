@@ -5,7 +5,7 @@ const TableFeedIn = (props) => {
       <td>
         <input
           type="text"
-          inputmode="numeric"
+          inputMode="numeric"
           name={props.input_by_pu}
           id={props.input_by_pu}
           form={props.form_id}
@@ -16,7 +16,7 @@ const TableFeedIn = (props) => {
       <td>
         <input
           type="text"
-          inputmode="numeric"
+          inputMode="numeric"
           name={props.input_by_nong}
           id={props.input_by_nong}
           form={props.form_id}
@@ -27,7 +27,7 @@ const TableFeedIn = (props) => {
       <td>
         <input
           type="text"
-          inputmode="numeric"
+          inputMode="numeric"
           name={props.input_by_sa}
           id={props.input_by_sa}
           form={props.form_id}

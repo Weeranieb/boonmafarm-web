@@ -66,7 +66,7 @@ const FeedPrice = () => {
                 </tr>
                 <tr>
                   <td className="text-end pe-4">
-                    <label for="date">วันที่ขึ้นราคา:</label>
+                    <label htmlFor="date">วันที่ขึ้นราคา:</label>
                   </td>
                   <td className="text-start">
                     <input
@@ -81,13 +81,13 @@ const FeedPrice = () => {
                 </tr>
                 <tr>
                   <td className="text-end pe-4">
-                    <label for="price">ราคา:</label>
+                    <label htmlFor="price">ราคา:</label>
                   </td>
                   <td className="text-start">
                     <input
                       type="text"
                       name="price"
-                      inputmode="numeric"
+                      inputMode="numeric"
                       id="price"
                       form="feed_price"
                       className="form-control form-control-sm"

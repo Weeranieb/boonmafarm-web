@@ -3,7 +3,7 @@ import "./General.css";
 const SearchDate = () => {
   return (
     <div>
-      <label for="month" className="me-3">
+      <label htmlFor="month" className="me-3">
         เดือน
       </label>
       <select
@@ -27,7 +27,7 @@ const SearchDate = () => {
         <option value="NOV">พฤศจิกายน</option>
         <option value="DEC">ธันวาคม</option>
       </select>
-      <label for="year" className="ms-4 me-3">
+      <label htmlFor="year" className="ms-4 me-3">
         ปี
       </label>
       <select
