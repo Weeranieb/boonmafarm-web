@@ -1,6 +1,4 @@
 const TableDailyFeed = (props) => {
-  console.log("table is creating");
-  console.log(props.feedData);
   const keys = [];
   let rows = [];
   for (const [index, day] of props.dates.entries()) {
@@ -12,7 +10,8 @@ const TableDailyFeed = (props) => {
       row.push(
         <td key={key}>
           <input
-            type="text"
+            type="number"
+            // type="text"
             inputMode="numeric"
             style={{ width: "33px" }}
             name={key}
