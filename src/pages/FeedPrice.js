@@ -34,10 +34,9 @@ const FeedPrice = () => {
                       disabled
                       className="form-select form-select-sm"
                       style={{ width: "95px" }}
+                      defaultValue="fish"
                     >
-                      <option value="fish" selected="selected">
-                        เหยื่อสด
-                      </option>
+                      <option value="fish">เหยื่อสด</option>
                       <option value="pro_feed">โปรฟีด</option>
                     </select>
                   </td>
@@ -55,10 +54,9 @@ const FeedPrice = () => {
                       disabled
                       className="form-select form-select-sm"
                       style={{ width: "80px" }}
+                      defaultValue="sa"
                     >
-                      <option value="sa" selected="selected">
-                        สา
-                      </option>
+                      <option value="sa">สา</option>
                       <option value="nong">น้อง</option>
                       <option value="pu">ปุ๊</option>
                     </select>
@@ -108,10 +106,9 @@ const FeedPrice = () => {
                       disabled
                       className="form-select form-select-sm"
                       style={{ width: "120px" }}
+                      defaultValue="Baht per box"
                     >
-                      <option value="Baht per box" selected="selected">
-                        บาทต่อกิโล
-                      </option>
+                      <option value="Baht per box">บาทต่อกิโล</option>
                       <option value="Baht per kilo">บาทต่อกิโล</option>
                       <option value="Baht per bag">บาทต่อถุง</option>
                     </select>
@@ -144,10 +141,12 @@ const FeedPrice = () => {
             </div>
             <table className="table">
               <thead className="text-center" style={{ fontSize: "17px" }}>
-                <th style={{ width: "46%" }}>วันที่</th>
-                <th style={{ width: "18%" }}>จำนวน</th>
-                <th style={{ width: "18%" }}>หน่วย</th>
-                <th style={{ width: "18%" }}></th>
+                <tr>
+                  <th style={{ width: "46%" }}>วันที่</th>
+                  <th style={{ width: "18%" }}>จำนวน</th>
+                  <th style={{ width: "18%" }}>หน่วย</th>
+                  <th style={{ width: "18%" }}></th>
+                </tr>
               </thead>
               <tbody>
                 <tr>

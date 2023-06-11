@@ -9,10 +9,9 @@ const SearchFarm = () => {
         id="farm"
         className="form-select form-select-sm"
         style={{ width: "100px" }}
+        defaultValue="farm_1"
       >
-        <option value="farm_1" selected="selected">
-          ฟาร์ม 1
-        </option>
+        <option value="farm_1">ฟาร์ม 1</option>
         <option value="farm_2">ฟาร์ม 2</option>
         <option value="farm_4">ฟาร์ม 4</option>
       </select>

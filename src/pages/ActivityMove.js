@@ -2,6 +2,7 @@ import SearchFarm from "../ui-components/SearchFarm";
 import { Link } from "react-router-dom";
 import "./Activity.css";
 import "./General.css";
+import SelectActivity from "../ui-components/SelectActivity";
 
 const ActivityMove = () => {
   return (
@@ -10,7 +11,7 @@ const ActivityMove = () => {
       <hr />
       <div className="row">
         <div className="col-6">
-          <div className="edit-header mb-4">ย้ายปลา</div>
+          <SelectActivity act={"move"} />
           <div className="input">
             <form action="#!" id="activity"></form>
             <table className="text-center table table-borderless" width="100%">
@@ -41,10 +42,9 @@ const ActivityMove = () => {
                       form="activity"
                       className="form-select form-select-sm"
                       style={{ width: "120px" }}
+                      defaultValue="Baht per box"
                     >
-                      <option value="Baht per box" selected="selected">
-                        บาทต่อกิโล
-                      </option>
+                      <option value="Baht per box">บาทต่อกิโล</option>
                       <option value="Baht per kilo">บาทต่อกิโล</option>
                       <option value="Baht per bag">บาทต่อถุง</option>
                     </select>
@@ -54,10 +54,9 @@ const ActivityMove = () => {
                       form="activity"
                       className="form-select form-select-sm ms-3"
                       style={{ width: "120px" }}
+                      defaultValue="Baht per box"
                     >
-                      <option value="Baht per box" selected="selected">
-                        บาทต่อกิโล
-                      </option>
+                      <option value="Baht per box">บาทต่อกิโล</option>
                       <option value="Baht per kilo">บาทต่อกิโล</option>
                       <option value="Baht per bag">บาทต่อถุง</option>
                     </select>
@@ -142,9 +141,11 @@ const ActivityMove = () => {
             </div>
             <table className="table">
               <thead className="text-center" style={{ fontSize: "17px" }}>
-                <th style={{ width: "30%" }}>วันที่</th>
-                <th style={{ width: "50%" }}>กิจกรรม</th>
-                <th style={{ width: "20%" }}></th>
+                <tr>
+                  <th style={{ width: "30%" }}>วันที่</th>
+                  <th style={{ width: "50%" }}>กิจกรรม</th>
+                  <th style={{ width: "20%" }}></th>
+                </tr>
               </thead>
               <tbody className="text-center">
                 <tr>

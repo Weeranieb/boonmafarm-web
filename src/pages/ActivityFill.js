@@ -1,18 +1,57 @@
 import SearchFarm from "../ui-components/SearchFarm";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import "./Activity.css";
 import "./General.css";
+import { useState } from "react";
+import SelectActivity from "../ui-components/SelectActivity";
 
 const ActivityFill = () => {
+  const location = useLocation();
+  // const { pond_id, pond_name } = location.state;
+
+  // set state
+  // set stateful variables
+  const [fillData, setFillData] = useState({
+    date: "",
+    amount: "",
+    weight: "",
+    price: "",
+    cost: "",
+  });
+
+  const handleChange = (event) => {
+    event.preventDefault();
+    let value = event.target.value;
+    let name = event.target.name;
+    let type = event.target.type;
+    if (type === "text") value = Number(value);
+    setFillData((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+    console.log(fillData);
+  };
+
+  const handleSubmit = () => (event) => {
+    event.preventDefault();
+
+    console.log(fillData);
+    // Perform actions with the form data
+    // For example, send data to a server or update the state
+
+    // Reset the form if needed
+    // setFillData({ date: "", amount: "", weight: "", price: "", cost: "" });
+  };
+
   return (
     <div>
       <div className="header">กิจกรรมบ่อ 3/2</div>
       <hr />
       <div className="row">
         <div className="col-6">
-          <div className="edit-header mb-4">ลงปลา</div>
+          <SelectActivity act={"fill"} />
           <div className="input">
-            <form action="#!" id="activity"></form>
+            <form onSubmit={handleSubmit} />
             <table className="text-center table table-borderless" width="100%">
               <tbody>
                 <tr>
@@ -24,9 +63,10 @@ const ActivityFill = () => {
                       type="date"
                       name="date"
                       id="date"
-                      form="activity"
+                      value={fillData.date}
                       className="form-control form-control-sm"
                       style={{ width: "185px" }}
+                      onChange={handleChange}
                     />
                   </td>
                 </tr>
@@ -37,12 +77,13 @@ const ActivityFill = () => {
                   <td className="text-start">
                     <input
                       type="text"
-                      name="price"
+                      name="amount"
                       inputMode="numeric"
-                      id="price"
-                      form="activity"
+                      id="amount"
+                      value={fillData.amount}
                       className="form-control form-control-sm"
                       style={{ width: "185px" }}
+                      onChange={handleChange}
                     />
                   </td>
                 </tr>
@@ -53,12 +94,13 @@ const ActivityFill = () => {
                   <td className="text-start">
                     <input
                       type="text"
-                      name="price"
+                      name="weight"
                       inputMode="numeric"
-                      id="price"
-                      form="activity"
+                      id="weight"
+                      value={fillData.weight}
                       className="form-control form-control-sm"
                       style={{ width: "185px" }}
+                      onChange={handleChange}
                     />
                   </td>
                 </tr>
@@ -72,9 +114,10 @@ const ActivityFill = () => {
                       name="price"
                       inputMode="numeric"
                       id="price"
-                      form="activity"
+                      value={fillData.price}
                       className="form-control form-control-sm"
                       style={{ width: "185px" }}
+                      onChange={handleChange}
                     />
                   </td>
                 </tr>
@@ -87,11 +130,12 @@ const ActivityFill = () => {
                     <input
                       type="text"
                       name="cost"
+                      value={fillData.cost}
                       inputMode="numeric"
                       id="cost"
-                      form="activity"
                       className="form-control form-control-sm"
                       style={{ width: "185px" }}
+                      onChange={handleChange}
                       disabled
                     />
                   </td>
@@ -100,7 +144,9 @@ const ActivityFill = () => {
             </table>
           </div>
           <div style={{ height: "20px" }}></div>
-          <button className="btn btn-primary btn-sm">Save</button>
+          <button className="btn btn-primary btn-sm" type="submit">
+            Save
+          </button>
           <Link
             to="/fillData/feed-price"
             className="btn btn-warning ms-1 btn-sm"
@@ -127,9 +173,11 @@ const ActivityFill = () => {
             </div>
             <table className="table">
               <thead className="text-center" style={{ fontSize: "17px" }}>
-                <th style={{ width: "30%" }}>วันที่</th>
-                <th style={{ width: "50%" }}>กิจกรรม</th>
-                <th style={{ width: "20%" }}></th>
+                <tr>
+                  <th style={{ width: "30%" }}>วันที่</th>
+                  <th style={{ width: "50%" }}>กิจกรรม</th>
+                  <th style={{ width: "20%" }}></th>
+                </tr>
               </thead>
               <tbody className="text-center">
                 <tr>

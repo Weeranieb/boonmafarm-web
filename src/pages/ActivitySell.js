@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import "./Activity.css";
 import "./General.css";
 import TableRows from "../components/TableRows";
+import SelectActivity from "../ui-components/SelectActivity";
 
 const ActivitySell = () => {
   const [rows, initRow] = useState([]);
@@ -32,20 +33,8 @@ const ActivitySell = () => {
       <div className="header">กิจกรรมบ่อ 3/2</div>
       <hr />
       <div className="row">
-        <div className="col-7">
-          <div className="edit-header mb-4">
-            <select
-              name="activity_select"
-              className="form-select btn-secondary"
-              style={{ width: "110px", fontSize: "17px", fontWeight: "500" }}
-            >
-              <option value="fill">ลงปลา</option>
-              <option value="move">ย้ายปลา</option>
-              <option value="sell" selected="selected">
-                ขายปลา
-              </option>
-            </select>
-          </div>
+        <div className="col-6">
+          <SelectActivity act={"sell"} />
           <div className="input">
             <form action="#!" id="activity"></form>
             <table className="text-center table table-borderless" width="100%">
@@ -141,9 +130,11 @@ const ActivitySell = () => {
             </div>
             <table className="table">
               <thead className="text-center" style={{ fontSize: "17px" }}>
-                <th style={{ width: "30%" }}>วันที่</th>
-                <th style={{ width: "50%" }}>กิจกรรม</th>
-                <th style={{ width: "20%" }}></th>
+                <tr>
+                  <th style={{ width: "30%" }}>วันที่</th>
+                  <th style={{ width: "50%" }}>กิจกรรม</th>
+                  <th style={{ width: "20%" }}></th>
+                </tr>
               </thead>
               <tbody className="text-center">
                 <tr>

@@ -1,4 +1,3 @@
-import "./General.css";
 const SearchFeedType = () => {
   return (
     <div style={{ fontSize: "15px" }}>
@@ -10,10 +9,9 @@ const SearchFeedType = () => {
         id="feed_type"
         className="form-select form-select-sm"
         style={{ width: "100px" }}
+        defaultValue="fish"
       >
-        <option value="fish" selected="selected">
-          เหยื่อสด
-        </option>
+        <option value="fish">เหยื่อสด</option>
         <option value="pro_feed">โปรฟีด</option>
       </select>
       <label htmlFor="vendor" className="ms-4 me-3">
@@ -24,10 +22,9 @@ const SearchFeedType = () => {
         id="vendor"
         className="form-select form-select-sm"
         style={{ width: "70px" }}
+        defaultValue="sa"
       >
-        <option value="sa" selected="selected">
-          สา
-        </option>
+        <option value="sa">สา</option>
         <option value="pu">ปุ๊</option>
         <option value="nong">น้อง</option>
       </select>
