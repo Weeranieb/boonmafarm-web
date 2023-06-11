@@ -1,16 +1,18 @@
 const TableDailyFeed = (props) => {
+  console.log("table is creating");
+  console.log(props.feedData);
   const keys = [];
   let rows = [];
   for (const [index, day] of props.dates.entries()) {
     let row = [];
     for (let pond of props.pondList) {
-      let key = `${index + 1}_${pond.name}`;
+      let key = `${props.month}${props.year}_${index + 1}_${pond.name}`;
       keys.push(key);
       let data = props.feedData[key];
       row.push(
         <td key={key}>
           <input
-            type="number"
+            type="text"
             inputMode="numeric"
             style={{ width: "33px" }}
             name={key}
@@ -25,7 +27,7 @@ const TableDailyFeed = (props) => {
     }
 
     rows.push(
-      <tr>
+      <tr key={index}>
         <td style={{ fontSize: "14px" }}>{day}</td>
         {row}
       </tr>

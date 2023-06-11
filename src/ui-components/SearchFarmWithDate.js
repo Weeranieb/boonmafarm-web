@@ -1,5 +1,4 @@
 const SearchFarmWithDate = (props) => {
-  console.log(props);
   return (
     <div style={{ position: "relative", right: "10px" }}>
       <label htmlFor="month" className="me-3">

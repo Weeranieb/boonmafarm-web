@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Fragment, useState } from "react";
 import SearchFarmWithDate from "../ui-components/SearchFarmWithDate";
 import TableDailyFeed from "../ui-components/TableDailyFeed";
 // import { fullMonthThai } from "../utils/date";
@@ -10,10 +10,12 @@ const DailyFeed = () => {
   const [farm, setFarm] = useState("ฟาร์ม 1");
   const [year, setYear] = useState(tempDate.getFullYear());
   const [month, setMonth] = useState(tempDate.getMonth() + 1);
-  // const [dailyFeed, setDailyFeed] = useState([]);
-  // const [dateInTable, setDateInTable] = useState([]);
+  const [isShow, setIsShow] = useState(false);
   const [feedByName, setFeedByName] = useState({});
-  const [idByPondName, setIdByPondName] = useState({});
+  const [idByPondName, setIdByPondName] = useState(new Map());
+  const updateIdByPondName = (k, v) => {
+    setIdByPondName(new Map(idByPondName.set(k, v)));
+  };
   const [dates, setDate] = useState([]);
   const [pondlist, setPondlist] = useState(rowDailyFeeds.get("ฟาร์ม 1"));
   // Function to update the values dynamically
@@ -22,9 +24,8 @@ const DailyFeed = () => {
     let name = event.target.name;
     setFeedByName((prevState) => ({
       ...prevState,
-      [name]: value,
+      [name]: Number(value),
     }));
-    console.log(feedByName);
   };
 
   const handleChange = () => (event) => {
@@ -32,25 +33,98 @@ const DailyFeed = () => {
     let name = event.target.name;
     if (name === "month") {
       setMonth(value);
-      setFeedByName({});
-      setIdByPondName({});
     } else if (name === "year") {
       setYear(value);
-      setFeedByName({});
-      setIdByPondName({});
     } else if (name === "farm") {
       setFarm(value);
-      setFeedByName({});
-      setIdByPondName({});
       setPondlist(rowDailyFeeds.get(value));
     }
     console.log(feedByName);
   };
 
-  const daysInMonth = (year, month) => new Date(year, month, 0).getDate();
+  const handleSave = (event) => {
+    event.preventDefault();
+    const daiyFeeds = [];
+    const pondMap = new Map(
+      pondlist.map(({ name, pond_id }) => [name, pond_id])
+    );
+    let i = 0;
+    for (const [pondKey, feed] of Object.entries(feedByName)) {
+      const [, day, pondName] = pondKey.split("_");
+      const pondId = pondMap.get(pondName);
+      if (!idByPondName.has(pondKey) || typeof idByPondName === "object") i--; // if object that means map is empty
+      if (feed > 0 || idByPondName.has(pondKey)) {
+        daiyFeeds.push({
+          daily_feed_id: idByPondName.get(pondKey) || i,
+          active_pond_id: -1,
+          pond_id: pondId,
+          feed_type: "เหยื่อสด",
+          feed_amount: feed,
+          feed_unit: "ลัง",
+          farm: farm,
+          date_issued: `${year}-${month
+            .toString()
+            .padStart(2, "0")}-${day.padStart(2, "0")}T00:00:00Z`,
+          record_status: "A",
+        });
+      }
+    }
+    const requestBody = {
+      feed_type: "เหยื่อสด",
+      farm: farm,
+      daily_feed: daiyFeeds,
+    };
 
-  useEffect(() => {
-    // actually it is just first time
+    console.log(requestBody);
+    // passed validation, so save changes
+    const headers = new Headers();
+    headers.append("Content-Type", "application/json");
+
+    let requestOptions = {
+      body: JSON.stringify(requestBody),
+      method: "POST",
+      headers: headers,
+      // credentials: "include",
+    };
+
+    fetch(
+      `${process.env.REACT_APP_BACKEND}/api/v1/feed/saveDailyFeeds`,
+      requestOptions
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.result) {
+          mapppingId(data.result);
+        } else {
+          console.log(data.error);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+    console.log(requestBody);
+
+    const mapppingId = (keyReceive) => {
+      console.log(idByPondName);
+      for (const key in idByPondName) {
+        if (idByPondName[key] < 0) {
+          const updatedValue = keyReceive[idByPondName[key]];
+          if (updatedValue !== undefined) {
+            updateIdByPondName(key, updatedValue);
+          }
+        }
+      }
+
+      console.log(idByPondName);
+    };
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    setFeedByName({});
+    setIdByPondName({});
+
+    console.log("submit with", month, year, farm);
     const fetchDailyFeed = async () => {
       try {
         const headers = new Headers();
@@ -76,6 +150,7 @@ const DailyFeed = () => {
       }
     };
 
+    const daysInMonth = (year, month) => new Date(year, month, 0).getDate();
     const createFeedForm = (tempDailyFeed) => {
       let dates = [];
       const days = daysInMonth(year, month);
@@ -88,18 +163,15 @@ const DailyFeed = () => {
       for (let day = 1; day <= days; day++) {
         dates.push(`${day} ${monthThai} ${yearThai}`);
         for (const pond of pondlist) {
-          let name = `${day}_${pond.name}`;
+          let name = `${month}${year}_${day}_${pond.name}`;
           if (feed?.pond_id === pond.pond_id && feedDate === day) {
             const feedAmount = feed?.feed_amount || 0;
-            const activePondId = feed?.active_pond_id || -1;
+            const dailyFeedId = feed?.daily_feed_id || -1;
             setFeedByName((prevState) => ({
               ...prevState,
               [name]: feedAmount,
             }));
-            setIdByPondName((prevState) => ({
-              ...prevState,
-              [name]: activePondId,
-            }));
+            updateIdByPondName(name, dailyFeedId);
             indexOfFeed++;
             if (indexOfFeed === lengthOfFeed) feed = undefined;
             else feed = tempDailyFeed[indexOfFeed];
@@ -109,25 +181,21 @@ const DailyFeed = () => {
               ...prevState,
               [name]: undefined,
             }));
-            // eslint-disable-next-line no-loop-func
-            setIdByPondName((prevState) => ({
-              ...prevState,
-              [name]: -1,
-            }));
           }
         }
       }
       setDate(dates);
     };
     fetchDailyFeed();
-  }, [farm, year, month, pondlist]);
+    setIsShow(true);
+  };
 
   return (
     <div>
       <div className="header">เหยื่อรายวัน</div>
       <hr />
-      <div className="text-end select-date">
-        <form action="#!">
+      <div className="text-end select-date mb-2">
+        <form onSubmit={handleSubmit}>
           <SearchFarmWithDate
             onChange={handleChange()}
             farm={farm}
@@ -136,30 +204,37 @@ const DailyFeed = () => {
           />
         </form>
       </div>
-      <form action="#!" id="feed_in_form"></form>
-      <div className="table-responsive tbodyDiv">
-        <table className="text-center table table-striped" width="100%">
-          <thead className="text-dark fw-bold">
-            <td>วัน</td>
-            {pondlist.map((pondName) => (
-              <td key={pondName.name}>{pondName.name}</td>
-            ))}
-          </thead>
-          <div style={{ height: "5px" }}></div>
-          <tbody>
-            <TableDailyFeed
-              dates={dates}
-              feedData={feedByName}
-              onChange={handleChangeFeed()}
-              pondList={pondlist}
-              form_id={"feed_in_form"}
-            />
-          </tbody>
-        </table>
-      </div>
-      <button className="btn btn-primary ms-3 mt-4" form="feed_in_form">
-        บันทึก
-      </button>
+      <form action="#!" id="feed_in_form" onSubmit={handleSave}></form>
+      {isShow && (
+        <Fragment>
+          <div className="table-responsive tbodyDiv">
+            <table className="text-center table table-striped" width="100%">
+              <thead className="text-dark fw-bold">
+                <tr>
+                  <th>วัน</th>
+                  {pondlist.map((pondName) => (
+                    <th key={pondName.name}>{pondName.name}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                <TableDailyFeed
+                  dates={dates}
+                  feedData={feedByName}
+                  month={month}
+                  year={year}
+                  onChange={handleChangeFeed()}
+                  pondList={pondlist}
+                  form_id={"feed_in_form"}
+                />
+              </tbody>
+            </table>
+          </div>
+          <button className="btn btn-primary ms-3 mt-4" form="feed_in_form">
+            บันทึก
+          </button>
+        </Fragment>
+      )}
     </div>
   );
 };
