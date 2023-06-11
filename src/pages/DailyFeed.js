@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useState } from "react";
 import SearchFarmWithDate from "../ui-components/SearchFarmWithDate";
 import TableDailyFeed from "../ui-components/TableDailyFeed";
 // import { fullMonthThai } from "../utils/date";
