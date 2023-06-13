@@ -1,4 +1,10 @@
-const SearchFarm = () => {
+const SearchFarm = (props) => {
+  const { onChange, property_pond, pondList } = props;
+
+  const selectedPondName =
+    property_pond && property_pond.pondName ? property_pond.pondName : "";
+
+  console.log(props);
   return (
     <div style={{ position: "relative", right: "10px" }}>
       <label htmlFor="farm" className="ms-4 me-3">
@@ -9,29 +15,29 @@ const SearchFarm = () => {
         id="farm"
         className="form-select form-select-sm"
         style={{ width: "100px" }}
-        defaultValue="farm_1"
+        onChange={onChange}
+        value={property_pond.farm}
       >
-        <option value="farm_1">ฟาร์ม 1</option>
-        <option value="farm_2">ฟาร์ม 2</option>
-        <option value="farm_4">ฟาร์ม 4</option>
+        <option value="ฟาร์ม 1">ฟาร์ม 1</option>
+        <option value="ฟาร์ม 2">ฟาร์ม 2</option>
+        <option value="ฟาร์ม 4">ฟาร์ม 4</option>
       </select>
       <label htmlFor="pond" className="ms-4 me-3">
         บ่อ
       </label>
       <select
-        name="pond"
-        id="pond"
+        name="pondName"
+        id="pondName"
         className="form-select form-select-sm"
         style={{ width: "100px" }}
+        onChange={onChange}
+        value={selectedPondName}
       >
-        <option value="1/1/2">1/1/2</option>
-        <option value="1/2">1/2</option>
-        <option value="2/2">2/2</option>
-        <option value="3/2">3/2</option>
-        <option value="4/2">4/2</option>
-        <option value="5/2">5/2</option>
-        <option value="6/2">6/2</option>
-        <option value="7/2">7/2</option>
+        {pondList.map((pond) => (
+          <option key={pond.pond_id} value={pond.name}>
+            {pond.name}
+          </option>
+        ))}
       </select>
       <button
         className="ms-4 btn btn-primary btn-sm"

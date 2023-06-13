@@ -105,3 +105,11 @@ export const rowDailyFeeds = new Map([
     ],
   ],
 ]);
+
+export const pondNameMapId = new Map();
+
+rowDailyFeeds.forEach((feeds) => {
+  feeds.forEach(({ name, pond_id }) => {
+    pondNameMapId.set(name, pond_id);
+  });
+});
