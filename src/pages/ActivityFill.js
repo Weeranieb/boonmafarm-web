@@ -2,7 +2,7 @@ import SearchFarm from "../ui-components/SearchFarm";
 import { Link, useLocation } from "react-router-dom";
 import "./Activity.css";
 import "./General.css";
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { pondNameMapId, rowDailyFeeds } from "../utils/pond";
 import { fetchData } from "../utils/fetch";
 import SelectActivity from "../ui-components/SelectActivity";
@@ -25,9 +25,8 @@ const ActivityFill = () => {
     farm: farm ?? "ฟาร์ม 1",
     pondName: pond_name ?? "1ซ้าย",
     pondId: pond_id ?? 1,
+    pondList: farm ? rowDailyFeeds.get(farm) : rowDailyFeeds.get("ฟาร์ม 1"),
   });
-  const [pondlist, setPondlist] = useState(rowDailyFeeds.get("ฟาร์ม 1"));
-  // const [pondId, setPondId] = useState(pond_id ?? 1);
   const [pondActivities, setPondActivities] = useState([]);
   const [activePondId, setActivePondId] = useState(active_pond_id ?? -1);
   // set stateful variables
@@ -41,34 +40,33 @@ const ActivityFill = () => {
     cost: 0,
   });
 
-  // useEffect(() => {
-  //   let fillId = fillData.fill_in_id;
-  //   setPondlist(rowDailyFeeds.get(fillData.farm));
-  //   console.log(fillData, activePondId);
-  //   if (fillId > 0 && activePondId > 0) {
-  //     const headers = new Headers();
-  //     headers.append("Content-Type", "application/json");
+  useEffect(() => {
+    let fillId = fillData.fill_in_id;
+    // setPondlist(rowDailyFeeds.get(fillData.farm));
+    if (fillId > 0 && activePondId > 0) {
+      const headers = new Headers();
+      headers.append("Content-Type", "application/json");
 
-  //     const requestOptions = {
-  //       method: "GET",
-  //       headers: headers,
-  //     };
+      const requestOptions = {
+        method: "GET",
+        headers: headers,
+      };
 
-  //     fetchData(
-  //       `${process.env.REACT_APP_BACKEND}/api/v1/activity/getFillHistory?active_pond_id=${activePondId}&fill_in_id=${fillId}`,
-  //       requestOptions
-  //     ).then((result) => {
-  //       if (result) {
-  //         console.log(result);
-  //         if (result.error) console.log(result.error);
-  //         else {
-  //           result.date_issued = result.date_issued.substring(0, 10);
-  //           setFillData(result);
-  //         }
-  //       }
-  //     });
-  //   }
-  // }, [activePondId, farm]);
+      fetchData(
+        `${process.env.REACT_APP_BACKEND}/api/v1/activity/getFillHistory?active_pond_id=${activePondId}&fill_in_id=${fillId}`,
+        requestOptions
+      ).then((result) => {
+        if (result) {
+          console.log(result);
+          if (result.error) console.log(result.error);
+          else {
+            result.date_issued = result.date_issued.substring(0, 10);
+            setFillData(result);
+          }
+        }
+      });
+    }
+  }, [activePondId, farm]);
 
   const handleChangePond = (event) => {
     event.preventDefault();
@@ -79,10 +77,11 @@ const ActivityFill = () => {
     if (name === "farm") {
       const ponds = rowDailyFeeds.get(value);
       if (ponds.length > 0) {
-        setPondlist(ponds);
+        // setPondlist(ponds);
         setSelectFarm((prevState) => ({
           ...prevState,
           pondName: ponds[0].name,
+          pondList: ponds,
         }));
         tempPondId = pondNameMapId.get(ponds[0].name);
       }
@@ -191,13 +190,13 @@ const ActivityFill = () => {
                 <tbody>
                   <tr>
                     <td className="text-end pe-4">
-                      <label htmlFor="date">วันที่ลงปลา:</label>
+                      <label htmlFor="date_issued">วันที่ลงปลา:</label>
                     </td>
                     <td className="text-start">
                       <input
                         type="date"
-                        name="date"
-                        id="date"
+                        name="date_issued"
+                        id="date_issued"
                         value={fillData.date_issued}
                         className="form-control form-control-sm"
                         style={{ width: "185px" }}
@@ -316,7 +315,7 @@ const ActivityFill = () => {
               <SearchFarm
                 onChange={handleChangePond}
                 property_pond={selectFarm}
-                pondList={pondlist}
+                // pondList={pondlist}
               />
             </form>
           </div>

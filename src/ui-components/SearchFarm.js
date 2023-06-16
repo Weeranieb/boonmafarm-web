@@ -1,9 +1,8 @@
 const SearchFarm = (props) => {
-  const { onChange, property_pond, pondList } = props;
+  const { onChange, property_pond } = props;
 
   const selectedPondName =
     property_pond && property_pond.pondName ? property_pond.pondName : "";
-
   return (
     <div style={{ position: "relative", right: "10px" }}>
       <label htmlFor="farm" className="ms-4 me-3">
@@ -32,7 +31,7 @@ const SearchFarm = (props) => {
         onChange={onChange}
         value={selectedPondName}
       >
-        {pondList.map((pond) => (
+        {property_pond.pondList.map((pond) => (
           <option key={pond.pond_id} value={pond.name}>
             {pond.name}
           </option>
