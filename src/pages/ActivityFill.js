@@ -1,5 +1,5 @@
 import SearchFarm from "../ui-components/SearchFarm";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useHistory } from "react-router-dom";
 import "./Activity.css";
 import "./General.css";
 import { Fragment, useEffect, useState } from "react";
@@ -9,8 +9,9 @@ import SelectActivity from "../ui-components/SelectActivity";
 import { activityDictionaryMap } from "../utils/activity";
 
 const ActivityFill = () => {
+  const history = useHistory();
   const location = useLocation();
-  const { farm, pond_id, pond_name, active_pond_id, activity_id } =
+  const { farm, pond_id, pond_name, active_pond_id, activity_id, activites } =
     location.state ?? {};
   console.log(
     "state value",
@@ -18,7 +19,8 @@ const ActivityFill = () => {
     pond_id,
     pond_name,
     active_pond_id,
-    activity_id
+    activity_id,
+    activites
   );
   // set state
   const [selectFarm, setSelectFarm] = useState({
@@ -27,7 +29,7 @@ const ActivityFill = () => {
     pondId: pond_id ?? 1,
     pondList: farm ? rowDailyFeeds.get(farm) : rowDailyFeeds.get("ฟาร์ม 1"),
   });
-  const [pondActivities, setPondActivities] = useState([]);
+  const [pondActivities, setPondActivities] = useState(activites || []);
   const [activePondId, setActivePondId] = useState(active_pond_id ?? -1);
   // set stateful variables
   const [fillData, setFillData] = useState({
@@ -118,26 +120,51 @@ const ActivityFill = () => {
       headers: headers,
     };
 
-    const getPondActivity = (tempActivePondId) => {
+    // check if same pond or not
+    const tempActivePondId =
+      pond_name === selectFarm.pondName ? activePondId : -1;
+
+    const resetState = (apId, activities) => {
+      history.push({
+        pathname: "/fillData/fill", // or the current path if needed
+        state: {
+          farm: selectFarm.farm,
+          pond_id: selectFarm.pondId,
+          pond_name: selectFarm.pondName,
+          active_pond_id: apId,
+          activity_id: undefined,
+          activites: activities || [],
+        },
+      });
+    };
+
+    const getPondActivity = (apId) => {
       fetchData(
-        `${process.env.REACT_APP_BACKEND}/api/v1/activity/getPondActivities?active_pond_id=${tempActivePondId}`,
+        `${process.env.REACT_APP_BACKEND}/api/v1/activity/getPondActivities?active_pond_id=${apId}`,
         requestOptions
       ).then((result) => {
         if (result) {
           setPondActivities(result);
-          setActivePondId(tempActivePondId);
+          setActivePondId(apId);
+          // Update location.state with the new values
+          resetState(apId, result);
+        } else {
+          resetState(tempActivePondId);
+          setPondActivities([]);
         }
       });
     };
 
-    if (active_pond_id) getPondActivity(active_pond_id);
+    if (tempActivePondId > 0) getPondActivity(tempActivePondId);
     else {
       let url = `/api/v1/master/getActivePondDetail?pond_id=${selectFarm.pondId}`;
-
       fetchData(`${process.env.REACT_APP_BACKEND}${url}`, requestOptions).then(
         (result) => {
           if (result) {
             getPondActivity(result.active_pond_id);
+          } else {
+            resetState();
+            setPondActivities([]);
           }
         }
       );
@@ -149,7 +176,6 @@ const ActivityFill = () => {
     let value = event.target.value;
     let name = event.target.name;
     let type = event.target.type;
-    console.log("every thing should be fine", value, name, type);
     if (type === "text") value = Number(value);
     value = value || ""; // Use an empty string as the default value if undefined
     setFillData((prevState) => ({
