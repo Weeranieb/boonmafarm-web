@@ -4,7 +4,6 @@ const SearchFarm = (props) => {
   const selectedPondName =
     property_pond && property_pond.pondName ? property_pond.pondName : "";
 
-  console.log(props);
   return (
     <div style={{ position: "relative", right: "10px" }}>
       <label htmlFor="farm" className="ms-4 me-3">

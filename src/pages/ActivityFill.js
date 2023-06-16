@@ -2,7 +2,7 @@ import SearchFarm from "../ui-components/SearchFarm";
 import { Link, useLocation } from "react-router-dom";
 import "./Activity.css";
 import "./General.css";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useState } from "react";
 import { pondNameMapId, rowDailyFeeds } from "../utils/pond";
 import { fetchData } from "../utils/fetch";
 import SelectActivity from "../ui-components/SelectActivity";
@@ -12,14 +12,14 @@ const ActivityFill = () => {
   const location = useLocation();
   const { farm, pond_id, pond_name, active_pond_id, activity_id } =
     location.state ?? {};
-  // console.log(
-  //   "state value",
-  //   farm,
-  //   pond_id,
-  //   pond_name,
-  //   active_pond_id,
-  //   activity_id
-  // );
+  console.log(
+    "state value",
+    farm,
+    pond_id,
+    pond_name,
+    active_pond_id,
+    activity_id
+  );
   // set state
   const [selectFarm, setSelectFarm] = useState({
     farm: farm ?? "ฟาร์ม 1",
@@ -41,36 +41,36 @@ const ActivityFill = () => {
     cost: 0,
   });
 
-  useEffect(() => {
-    let fillId = fillData.fill_in_id;
-    setPondlist(rowDailyFeeds.get(farm));
-    console.log(fillData, activePondId);
-    if (fillId > 0 && activePondId > 0) {
-      const headers = new Headers();
-      headers.append("Content-Type", "application/json");
+  // useEffect(() => {
+  //   let fillId = fillData.fill_in_id;
+  //   setPondlist(rowDailyFeeds.get(fillData.farm));
+  //   console.log(fillData, activePondId);
+  //   if (fillId > 0 && activePondId > 0) {
+  //     const headers = new Headers();
+  //     headers.append("Content-Type", "application/json");
 
-      const requestOptions = {
-        method: "GET",
-        headers: headers,
-      };
+  //     const requestOptions = {
+  //       method: "GET",
+  //       headers: headers,
+  //     };
 
-      fetchData(
-        `${process.env.REACT_APP_BACKEND}/api/v1/activity/getFillHistory?active_pond_id=${activePondId}&fill_in_id=${fillId}`,
-        requestOptions
-      ).then((result) => {
-        if (result) {
-          console.log(result);
-          if (result.error) console.log(result.error);
-          else {
-            result.date_issued = result.date_issued.substring(0, 10);
-            setFillData(result);
-          }
-        }
-      });
-    }
-  }, [activePondId, farm]);
+  //     fetchData(
+  //       `${process.env.REACT_APP_BACKEND}/api/v1/activity/getFillHistory?active_pond_id=${activePondId}&fill_in_id=${fillId}`,
+  //       requestOptions
+  //     ).then((result) => {
+  //       if (result) {
+  //         console.log(result);
+  //         if (result.error) console.log(result.error);
+  //         else {
+  //           result.date_issued = result.date_issued.substring(0, 10);
+  //           setFillData(result);
+  //         }
+  //       }
+  //     });
+  //   }
+  // }, [activePondId, farm]);
 
-  const handleChangePond = () => (event) => {
+  const handleChangePond = (event) => {
     event.preventDefault();
     const value = event.target.value;
     const name = event.target.name;
@@ -78,12 +78,14 @@ const ActivityFill = () => {
 
     if (name === "farm") {
       const ponds = rowDailyFeeds.get(value);
-      setPondlist(ponds);
-      setSelectFarm((prevState) => ({
-        ...prevState,
-        pondName: ponds[0].name,
-      }));
-      tempPondId = pondNameMapId.get(ponds[0].name);
+      if (ponds.length > 0) {
+        setPondlist(ponds);
+        setSelectFarm((prevState) => ({
+          ...prevState,
+          pondName: ponds[0].name,
+        }));
+        tempPondId = pondNameMapId.get(ponds[0].name);
+      }
     } else {
       tempPondId = pondNameMapId.get(value);
     }
@@ -98,13 +100,13 @@ const ActivityFill = () => {
     }));
   };
 
-  const handleSearchPond = () => (event) => {
+  const handleSearchPond = (event) => {
     event.preventDefault();
     setFillData({
-      date: "",
+      date_issued: "",
       amount: 0,
-      weight: 0,
-      price: 0,
+      weight_per_fish: 0,
+      price_per_unit: 0,
       additional_cost: 0,
       cost: 0,
     });
@@ -148,6 +150,7 @@ const ActivityFill = () => {
     let value = event.target.value;
     let name = event.target.name;
     let type = event.target.type;
+    console.log("every thing should be fine", value, name, type);
     if (type === "text") value = Number(value);
     value = value || ""; // Use an empty string as the default value if undefined
     setFillData((prevState) => ({
@@ -162,7 +165,7 @@ const ActivityFill = () => {
     // Perform any necessary processing or data manipulation here
     // You can access the form data from the `fillData` state variable
     const cost =
-      fillData.amount * fillData.price * fillData.weight +
+      fillData.amount * fillData.price_per_unit * fillData.weight_per_fish +
       fillData.additional_cost;
     setFillData((prevState) => ({
       ...prevState,
@@ -204,7 +207,7 @@ const ActivityFill = () => {
                   </tr>
                   <tr>
                     <td className="text-end pe-4">
-                      <label htmlFor="date">จำนวนปลาที่ลง:</label>
+                      <label htmlFor="amount">จำนวนปลาที่ลง:</label>
                     </td>
                     <td className="text-start">
                       <input
@@ -221,14 +224,14 @@ const ActivityFill = () => {
                   </tr>
                   <tr>
                     <td className="text-end pe-4">
-                      <label htmlFor="date">น้ำหนักปลาต่อตัว:</label>
+                      <label htmlFor="weight_per_fish">น้ำหนักปลาต่อตัว:</label>
                     </td>
                     <td className="text-start">
                       <input
                         type="text"
-                        name="weight"
+                        name="weight_per_fish"
                         inputMode="numeric"
-                        id="weight"
+                        id="weight_per_fish"
                         value={fillData.weight_per_fish}
                         className="form-control form-control-sm"
                         style={{ width: "185px" }}
@@ -238,14 +241,14 @@ const ActivityFill = () => {
                   </tr>
                   <tr>
                     <td className="text-end pe-4">
-                      <label htmlFor="date">ราคาปลา:</label>
+                      <label htmlFor="price_per_unit">ราคาปลา:</label>
                     </td>
                     <td className="text-start">
                       <input
                         type="text"
-                        name="price"
+                        name="price_per_unit"
                         inputMode="numeric"
-                        id="price"
+                        id="price_per_unit"
                         value={fillData.price_per_unit}
                         className="form-control form-control-sm"
                         style={{ width: "185px" }}
@@ -255,7 +258,7 @@ const ActivityFill = () => {
                   </tr>
                   <tr>
                     <td className="text-end pe-4">
-                      <label htmlFor="date">ค่าใช้จ่าย:</label>
+                      <label htmlFor="additional_cost">ค่าใช้จ่าย:</label>
                     </td>
                     <td className="text-start">
                       <input
@@ -272,7 +275,7 @@ const ActivityFill = () => {
                   </tr>
                   <tr>
                     <td className="text-end pe-4">
-                      <label htmlFor="date">ต้นทุน:</label>
+                      <label htmlFor="cost">ต้นทุน:</label>
                     </td>
                     <td className="text-start">
                       <input
@@ -309,9 +312,9 @@ const ActivityFill = () => {
         </div>
         <div className="col">
           <div className="text-end select-date mb-4">
-            <form action="#!" onSubmit={handleSearchPond()}>
+            <form onSubmit={handleSearchPond}>
               <SearchFarm
-                onChange={handleChangePond()}
+                onChange={handleChangePond}
                 property_pond={selectFarm}
                 pondList={pondlist}
               />
