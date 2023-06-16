@@ -54,6 +54,7 @@ const ActivityFill = () => {
         headers: headers,
       };
 
+      console.log("fetch prepare to begin");
       fetchData(
         `${process.env.REACT_APP_BACKEND}/api/v1/activity/getFillHistory?active_pond_id=${activePondId}&fill_in_id=${fillId}`,
         requestOptions
@@ -63,6 +64,9 @@ const ActivityFill = () => {
           if (result.error) console.log(result.error);
           else {
             result.date_issued = result.date_issued.substring(0, 10);
+            result.cost =
+              result.amount * result.price_per_unit * result.weight_per_fish +
+              (result.additional_cost || 0);
             setFillData(result);
           }
         }
@@ -378,6 +382,7 @@ const ActivityFill = () => {
                               pond_name: selectFarm.pondName,
                               active_pond_id: activePondId,
                               activity_id: activity.activity_id,
+                              activites: pondActivities,
                             },
                           }}
                           className="link-dark"
