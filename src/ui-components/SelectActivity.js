@@ -1,28 +1,29 @@
-import { useState } from "react";
-import { useHistory } from "react-router-dom";
+import React, { useState } from "react";
+import { useHistory, useLocation } from "react-router-dom";
 
 const SelectActivity = (props) => {
   const [selectedOption, setSelectedOption] = useState(props.act);
   const history = useHistory();
+  const location = useLocation();
+
+  const { farm, pond_id, pond_name, active_pond_id, activity_id, activities } =
+    location.state || {};
 
   const handleChange = (event) => {
     const selectedValue = event.target.value;
     setSelectedOption(selectedValue);
 
-    // Perform actions based on the selected option
-    switch (selectedValue) {
-      case "fill":
-        history.push("/fillData/fill");
-        break;
-      case "move":
-        history.push("/fillData/move");
-        break;
-      case "sell":
-        history.push("/fillData/sell");
-        break;
-      default:
-        break;
-    }
+    const path = `/fillData/${selectedValue}`;
+    const state = {
+      farm,
+      pond_id,
+      pond_name,
+      active_pond_id,
+      activity_id,
+      activities,
+    };
+
+    history.push({ pathname: path, state });
   };
 
   return (

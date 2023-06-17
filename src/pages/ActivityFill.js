@@ -199,9 +199,7 @@ const ActivityFill = () => {
       additional_cost,
       cost,
     }));
-    console.log(fillData);
     // passed validation, so save changes
-    console.log(activePondId);
     const fillInId = fillData.fill_in_id || -1;
     const requestBody = {
       pond_id: selectFarm.pondId,
@@ -219,9 +217,6 @@ const ActivityFill = () => {
         record_status: "A",
       },
     };
-
-    console.log(requestBody);
-    console.log(pondActivities);
 
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
@@ -250,6 +245,7 @@ const ActivityFill = () => {
       });
 
     const refreshStateAfterSave = (fillHistory) => {
+      // if it's new than new save
       if (fillInId < 0)
         pondActivities.unshift({
           activity_id: fillHistory.fill_in_id,
@@ -277,7 +273,15 @@ const ActivityFill = () => {
       <hr />
       <div className="row">
         <div className="col-6">
-          <SelectActivity act={"fill"} />
+          <SelectActivity
+            act={"fill"}
+            farm={farm}
+            pond_id={pond_id}
+            pond_name={pond_name}
+            active_pond_id={active_pond_id}
+            activity_id={activity_id}
+            activities={activities}
+          />
           <form onSubmit={handleSubmit}>
             <div className="input">
               <table
@@ -448,7 +452,18 @@ const ActivityFill = () => {
                     <tr>
                       <td>{activity.date}</td>
                       <td>
-                        {activityDictionaryMap.get(activity.activity_type)}
+                        <span
+                          className={
+                            activity.activity_type === "fill" &&
+                            activity.activity_id === activity_id
+                              ? "bg-info"
+                              : ""
+                          }
+                        >
+                          {activity.activity_type === "move"
+                            ? activity.detail
+                            : activityDictionaryMap.get(activity.activity_type)}
+                        </span>
                       </td>
                       <td>
                         <Link

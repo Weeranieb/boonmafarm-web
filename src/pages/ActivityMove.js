@@ -12,8 +12,8 @@ import {
 } from "../utils/pond";
 import { activityDictionaryMap } from "../utils/activity";
 import SearchFarmNoSearch from "../ui-components/SearchFarmNoSearch";
+import { changeTimeUTCToThaiDate } from "../utils/date";
 
-// FIXME need use state to download data and send state to_prefix
 const ActivityMove = () => {
   const history = useHistory();
   const location = useLocation();
@@ -126,9 +126,13 @@ const ActivityMove = () => {
               .then(([tempFarm, tempPondName]) => {
                 result.to_farm = tempFarm;
                 result.to_pond_name = swappedPondNameMap.get(tempPondName);
-                console.log(tempPondName);
-                console.log("result from search", result);
                 setMoveData(result);
+                setSelectToPond((prevState) => ({
+                  ...prevState,
+                  farm: tempFarm,
+                  pondName: swappedPondNameMap.get(tempPondName),
+                }));
+                console.log("selected pond", selectToPond);
               })
               .catch((error) => {
                 console.log(error);
@@ -291,16 +295,108 @@ const ActivityMove = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    console.log(selectToPond);
+    const fish_amount = Number(moveData.fish_amount);
+    const price_per_kilo = Number(moveData.price_per_kilo);
+    const weight_per_fish = Number(moveData.weight_per_fish);
+    const additional_cost = Number(moveData.additional_cost);
+
+    const tempActivePondId = active_pond_id || -1;
+    setMoveData((prevState) => ({
+      ...prevState,
+      fish_amount,
+      price_per_kilo,
+      weight_per_fish,
+      additional_cost,
+    }));
+
+    const moveInId = moveData.move_id || -1;
+    const requestBody = {
+      pond_id: selectFarmAndPond.pondId,
+      to_pond_id: selectToPond.pondId,
+      active_pond_id: tempActivePondId,
+      move_id: moveInId,
+      move_history: {
+        move_id: moveInId,
+        from_pond_id: tempActivePondId,
+        to_pond_id: -1,
+        fish_amount: fish_amount,
+        weight_per_fish: weight_per_fish,
+        price_per_kilo: price_per_kilo,
+        additional_cost: additional_cost,
+        date_issued: `${moveData.date_issued}T00:00:00Z`,
+        record_status: "A",
+      },
+    };
+    console.log(requestBody);
+
+    // request POST
+    const headers = new Headers();
+    headers.append("Content-Type", "application/json");
+
+    let requestOptions = {
+      body: JSON.stringify(requestBody),
+      method: "POST",
+      headers: headers,
+    };
+
+    fetch(
+      `${process.env.REACT_APP_BACKEND}/api/v1/activity/saveMoveHistory`,
+      requestOptions
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.result) {
+          console.log("result after save", data.result);
+          refreshStateAfterSave(data.result);
+        } else {
+          console.log(data.error);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
+    const refreshStateAfterSave = (moveHistory) => {
+      // if it's new than new save
+      if (moveInId < 0)
+        pondActivities.unshift({
+          activity_id: moveHistory.move_id,
+          activity_type: "move",
+          date: changeTimeUTCToThaiDate(moveHistory.date_issued),
+          detail: `ย้ายปลา บ่อ${selectFarmAndPond.pondName}ไปบ่อ${selectToPond.pondName}`,
+        });
+      history.push({
+        pathname: "/fillData/move", // or the current path if needed
+        state: {
+          farm: selectFarmAndPond.farm,
+          to_farm: selectToPond.farm,
+          pond_id: selectFarmAndPond.pondId,
+          to_pond_id: selectToPond.pondId,
+          pond_name: selectFarmAndPond.pondName,
+          to_pond_name: selectToPond.pondName,
+          active_pond_id: moveHistory.from_pond_id,
+          activity_id: moveHistory.move_id,
+          activities: pondActivities,
+        },
+      });
+    };
   };
 
   return (
     <div>
-      <div className="header">กิจกรรมบ่อ 3/2</div>
+      <div className="header">กิจกรรมบ่อ {pond_name || "1ซ้าย"}</div>
       <hr />
       <div className="row">
         <div className="col-6">
-          <SelectActivity act={"move"} />
+          <SelectActivity
+            act={"move"}
+            farm={farm}
+            pond_id={pond_id}
+            pond_name={pond_name}
+            active_pond_id={active_pond_id}
+            activity_id={activity_id}
+            activities={activities}
+          />
           <form onSubmit={handleSubmit}>
             <div className="input">
               <table
@@ -382,7 +478,7 @@ const ActivityMove = () => {
                         className="form-control form-control-sm"
                         style={{ width: "185px" }}
                         onChange={handleChange}
-                        value={moveData.additional_cost}
+                        value={moveData.price_per_kilo}
                       />
                     </td>
                   </tr>
@@ -399,6 +495,7 @@ const ActivityMove = () => {
                         className="form-control form-control-sm"
                         style={{ width: "185px" }}
                         onChange={handleChange}
+                        value={moveData.additional_cost}
                       />
                     </td>
                   </tr>
@@ -407,7 +504,24 @@ const ActivityMove = () => {
             </div>
             <div style={{ height: "20px" }}></div>
             <button className="btn btn-primary btn-sm ps-2 pe-2">บันทึก</button>
-            <Link to="#!" className="btn btn-warning ms-1 btn-sm">
+            <Link
+              to={{
+                pathname: `/fillData/move`,
+                state: {
+                  farm: selectFarmAndPond.farm,
+                  to_farm: selectToPond.farm,
+                  pond_id: selectFarmAndPond.pondId,
+                  to_pond_id: selectToPond.pondId,
+                  pond_name: selectFarmAndPond.pondName,
+                  to_pond_name: selectToPond.pondName,
+                  active_pond_id: activePondId,
+                  activity_id: activity_id,
+                  activities: pondActivities,
+                },
+              }}
+              className="btn btn-warning ms-1 btn-sm"
+              onClick={() => setShouldRefresh(true)}
+            >
               ยกเลิก
             </Link>
             <Link
@@ -447,7 +561,18 @@ const ActivityMove = () => {
                     <tr>
                       <td>{activity.date}</td>
                       <td>
-                        {activityDictionaryMap.get(activity.activity_type)}
+                        <span
+                          className={
+                            activity.activity_type === "move" &&
+                            activity.activity_id === activity_id
+                              ? "bg-info"
+                              : ""
+                          }
+                        >
+                          {activity.activity_type === "move"
+                            ? activity.detail
+                            : activityDictionaryMap.get(activity.activity_type)}
+                        </span>
                       </td>
                       <td>
                         <Link
