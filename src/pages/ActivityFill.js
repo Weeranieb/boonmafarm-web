@@ -9,6 +9,8 @@ import SelectActivity from "../ui-components/SelectActivity";
 import { activityDictionaryMap } from "../utils/activity";
 import { changeTimeUTCToThaiDate } from "../utils/date";
 
+// TODO 1. add warning when fill is not enough and not save until fulfill
+// TODO 2. send state value to another page in fillData
 const ActivityFill = () => {
   const history = useHistory();
   const location = useLocation();
@@ -65,7 +67,7 @@ const ActivityFill = () => {
         }
       });
     }
-  }, [activePondId, farm, shouldRefresh]);
+  }, [activePondId, shouldRefresh]);
 
   const handleChangePond = (event) => {
     event.preventDefault();
@@ -172,8 +174,6 @@ const ActivityFill = () => {
     event.preventDefault();
     let value = event.target.value;
     let name = event.target.name;
-    // let type = event.target.type;
-    // if (type === "text") value = Number(value);
     value = value || ""; // Use an empty string as the default value if undefined
     setFillData((prevState) => ({
       ...prevState,
@@ -391,7 +391,7 @@ const ActivityFill = () => {
               </table>
             </div>
             <div style={{ height: "20px" }}></div>
-            <button className="btn btn-primary btn-sm">Save</button>
+            <button className="btn btn-primary btn-sm">บันทึก</button>
             <Link
               to={{
                 pathname: `/fillData/fill`,
@@ -407,14 +407,14 @@ const ActivityFill = () => {
               className="btn btn-warning ms-1 btn-sm"
               onClick={() => setShouldRefresh(true)}
             >
-              Cancel
+              ยกเลิก
             </Link>
             <Link
               to="#!"
-              className="btn btn-danger ms-1 btn-sm"
+              className="btn btn-danger ms-1 btn-sm ps-3 pe-3"
               onClick={() => console.log("not implement")}
             >
-              Delete
+              ลบ
             </Link>
           </form>
         </div>
