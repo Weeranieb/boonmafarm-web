@@ -7,14 +7,13 @@ import { pondNameMapId, rowDailyFeeds } from "../utils/pond";
 import { fetchData } from "../utils/fetch";
 import SelectActivity from "../ui-components/SelectActivity";
 import { activityDictionaryMap } from "../utils/activity";
+import { changeTimeUTCToThaiDate } from "../utils/date";
 
 const ActivityFill = () => {
   const history = useHistory();
   const location = useLocation();
-  const { farm, pond_id, pond_name, active_pond_id, activity_id, activites } =
+  const { farm, pond_id, pond_name, active_pond_id, activity_id, activities } =
     location.state ?? {};
-
-  console.log(farm, pond_id, pond_name, active_pond_id, activity_id, activites);
   // set state
   const [selectFarm, setSelectFarm] = useState({
     farm: farm ?? "ฟาร์ม 1",
@@ -22,7 +21,7 @@ const ActivityFill = () => {
     pondId: pond_id ?? 1,
     pondList: farm ? rowDailyFeeds.get(farm) : rowDailyFeeds.get("ฟาร์ม 1"),
   });
-  const [pondActivities, setPondActivities] = useState(activites || []);
+  const [pondActivities, setPondActivities] = useState(activities || []);
   const [activePondId, setActivePondId] = useState(active_pond_id ?? -1);
   const [shouldRefresh, setShouldRefresh] = useState(false);
   // set stateful variables
@@ -41,7 +40,6 @@ const ActivityFill = () => {
       window.location.reload();
     }
     let fillId = fillData.fill_in_id;
-    // setPondlist(rowDailyFeeds.get(fillData.farm));
     if (fillId > 0 && activePondId > 0) {
       const headers = new Headers();
       headers.append("Content-Type", "application/json");
@@ -120,7 +118,6 @@ const ActivityFill = () => {
     };
 
     // check if same pond or not
-    console.log("active_pond_id = ", active_pond_id);
     const tempActivePondId =
       pond_name === selectFarm.pondName ? active_pond_id : -1;
 
@@ -133,7 +130,7 @@ const ActivityFill = () => {
           pond_name: selectFarm.pondName,
           active_pond_id: apId,
           activity_id: undefined,
-          activites: activities || [],
+          activities: activities || [],
         },
       });
     };
@@ -190,8 +187,9 @@ const ActivityFill = () => {
     const price_per_unit = Number(fillData.price_per_unit);
     const weight_per_fish = Number(fillData.weight_per_fish);
     const additional_cost = Number(fillData.additional_cost);
-    // Perform any necessary processing or data manipulation here
-    // You can access the form data from the `fillData` state variable
+
+    const tempActivePondId = active_pond_id || -1;
+
     const cost = amount * price_per_unit * weight_per_fish + additional_cost;
     setFillData((prevState) => ({
       ...prevState,
@@ -202,13 +200,80 @@ const ActivityFill = () => {
       cost,
     }));
     console.log(fillData);
-  };
+    // passed validation, so save changes
+    console.log(activePondId);
+    const fillInId = fillData.fill_in_id || -1;
+    const requestBody = {
+      pond_id: selectFarm.pondId,
+      active_pond_id: tempActivePondId,
+      fill_in_id: fillInId,
+      fill_history: {
+        fill_in_id: fillInId,
+        active_pond_id: tempActivePondId,
+        amount: amount,
+        weight_per_fish: weight_per_fish,
+        price_per_unit: price_per_unit,
+        fish_unit: "kilogram",
+        additional_cost: additional_cost,
+        date_issued: `${fillData.date_issued}T00:00:00Z`,
+        record_status: "A",
+      },
+    };
 
-  // useEffect();
+    console.log(requestBody);
+    console.log(pondActivities);
+
+    const headers = new Headers();
+    headers.append("Content-Type", "application/json");
+
+    let requestOptions = {
+      body: JSON.stringify(requestBody),
+      method: "POST",
+      headers: headers,
+    };
+
+    fetch(
+      `${process.env.REACT_APP_BACKEND}/api/v1/activity/saveFillHistory`,
+      requestOptions
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.result) {
+          console.log("result after save", data.result);
+          refreshStateAfterSave(data.result);
+        } else {
+          console.log(data.error);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
+    const refreshStateAfterSave = (fillHistory) => {
+      if (fillInId < 0)
+        pondActivities.unshift({
+          activity_id: fillHistory.fill_in_id,
+          activity_type: "fill",
+          date: changeTimeUTCToThaiDate(fillHistory.date_issued),
+          detail: `เติมปลา บ่อ ${pond_name}`,
+        });
+      history.push({
+        pathname: "/fillData/fill", // or the current path if needed
+        state: {
+          farm: selectFarm.farm,
+          pond_id: selectFarm.pondId,
+          pond_name: selectFarm.pondName,
+          active_pond_id: fillHistory.active_pond_id,
+          activity_id: fillHistory.fill_in_id,
+          activities: pondActivities,
+        },
+      });
+    };
+  };
 
   return (
     <div>
-      <div className="header">กิจกรรมบ่อ 3/2</div>
+      <div className="header">กิจกรรมบ่อ {pond_name || "1ซ้าย"}</div>
       <hr />
       <div className="row">
         <div className="col-6">
@@ -336,7 +401,7 @@ const ActivityFill = () => {
                   pond_name: selectFarm.pondName,
                   active_pond_id: activePondId,
                   activity_id: activity_id,
-                  activites: pondActivities,
+                  activities: pondActivities,
                 },
               }}
               className="btn btn-warning ms-1 btn-sm"
@@ -359,7 +424,6 @@ const ActivityFill = () => {
               <SearchFarm
                 onChange={handleChangePond}
                 property_pond={selectFarm}
-                // pondList={pondlist}
               />
             </form>
           </div>
@@ -396,7 +460,7 @@ const ActivityFill = () => {
                               pond_name: selectFarm.pondName,
                               active_pond_id: activePondId,
                               activity_id: activity.activity_id,
-                              activites: pondActivities,
+                              activities: pondActivities,
                             },
                           }}
                           className="link-dark"

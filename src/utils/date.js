@@ -27,3 +27,12 @@ export const thaiMonths = [
   "พ.ย.",
   "ธ.ค.",
 ];
+
+export const changeTimeUTCToThaiDate = (dateUTC) => {
+  const exactDate = dateUTC.slice(0, 10);
+  const date = new Date(exactDate);
+  const year = date.getFullYear() + 543;
+  const month = fullMonthThai[date.getMonth()];
+  const day = date.getDate();
+  return `${day} ${month} ${year}`;
+};
