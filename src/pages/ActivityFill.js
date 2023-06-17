@@ -31,6 +31,7 @@ const ActivityFill = () => {
   });
   const [pondActivities, setPondActivities] = useState(activites || []);
   const [activePondId, setActivePondId] = useState(active_pond_id ?? -1);
+  const [shouldRefresh, setShouldRefresh] = useState(false);
   // set stateful variables
   const [fillData, setFillData] = useState({
     fill_in_id: activity_id ?? -1,
@@ -43,6 +44,9 @@ const ActivityFill = () => {
   });
 
   useEffect(() => {
+    if (shouldRefresh) {
+      window.location.reload();
+    }
     let fillId = fillData.fill_in_id;
     // setPondlist(rowDailyFeeds.get(fillData.farm));
     if (fillId > 0 && activePondId > 0) {
@@ -72,7 +76,7 @@ const ActivityFill = () => {
         }
       });
     }
-  }, [activePondId, farm]);
+  }, [activePondId, farm, shouldRefresh]);
 
   const handleChangePond = (event) => {
     event.preventDefault();
@@ -386,6 +390,7 @@ const ActivityFill = () => {
                             },
                           }}
                           className="link-dark"
+                          onClick={() => setShouldRefresh(true)}
                         >
                           แก้ไข
                         </Link>
