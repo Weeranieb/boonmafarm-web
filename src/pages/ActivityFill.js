@@ -327,10 +327,6 @@ const ActivityFill = () => {
             </div>
             <div style={{ height: "20px" }}></div>
             <button className="btn btn-primary btn-sm">Save</button>
-            {/* <Link
-              to="#!"
-              className="btn btn-warning ms-1 btn-sm"
-            > */}
             <Link
               to={{
                 pathname: `/fillData/fill`,
