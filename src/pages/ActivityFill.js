@@ -13,15 +13,6 @@ const ActivityFill = () => {
   const location = useLocation();
   const { farm, pond_id, pond_name, active_pond_id, activity_id, activites } =
     location.state ?? {};
-  console.log(
-    "state value",
-    farm,
-    pond_id,
-    pond_name,
-    active_pond_id,
-    activity_id,
-    activites
-  );
   // set state
   const [selectFarm, setSelectFarm] = useState({
     farm: farm ?? "ฟาร์ม 1",
@@ -58,13 +49,11 @@ const ActivityFill = () => {
         headers: headers,
       };
 
-      console.log("fetch prepare to begin");
       fetchData(
         `${process.env.REACT_APP_BACKEND}/api/v1/activity/getFillHistory?active_pond_id=${activePondId}&fill_in_id=${fillId}`,
         requestOptions
       ).then((result) => {
         if (result) {
-          console.log(result);
           if (result.error) console.log(result.error);
           else {
             result.date_issued = result.date_issued.substring(0, 10);
@@ -183,8 +172,8 @@ const ActivityFill = () => {
     event.preventDefault();
     let value = event.target.value;
     let name = event.target.name;
-    let type = event.target.type;
-    if (type === "text") value = Number(value);
+    // let type = event.target.type;
+    // if (type === "text") value = Number(value);
     value = value || ""; // Use an empty string as the default value if undefined
     setFillData((prevState) => ({
       ...prevState,
@@ -194,16 +183,22 @@ const ActivityFill = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-
+    const amount = Number(fillData.amount);
+    const price_per_unit = Number(fillData.price_per_unit);
+    const weight_per_fish = Number(fillData.weight_per_fish);
+    const additional_cost = Number(fillData.additional_cost);
     // Perform any necessary processing or data manipulation here
     // You can access the form data from the `fillData` state variable
-    const cost =
-      fillData.amount * fillData.price_per_unit * fillData.weight_per_fish +
-      fillData.additional_cost;
+    const cost = amount * price_per_unit * weight_per_fish + additional_cost;
     setFillData((prevState) => ({
       ...prevState,
+      amount,
+      price_per_unit,
+      weight_per_fish,
+      additional_cost,
       cost,
     }));
+    console.log(fillData);
   };
 
   // useEffect();
@@ -329,15 +324,31 @@ const ActivityFill = () => {
             </div>
             <div style={{ height: "20px" }}></div>
             <button className="btn btn-primary btn-sm">Save</button>
-            <Link
-              to="/fillData/feed-price"
+            {/* <Link
+              to="#!"
               className="btn btn-warning ms-1 btn-sm"
+            > */}
+            <Link
+              to={{
+                pathname: `/fillData/fill`,
+                state: {
+                  farm: selectFarm.farm,
+                  pond_id: selectFarm.pondId,
+                  pond_name: selectFarm.pondName,
+                  active_pond_id: activePondId,
+                  activity_id: activePondId,
+                  activites: pondActivities,
+                },
+              }}
+              className="btn btn-warning ms-1 btn-sm"
+              onClick={() => setShouldRefresh(true)}
             >
               Cancel
             </Link>
             <Link
-              to="/fillData/feed-price"
+              to="#!"
               className="btn btn-danger ms-1 btn-sm"
+              onClick={() => console.log("not implement")}
             >
               Delete
             </Link>
