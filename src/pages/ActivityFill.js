@@ -13,6 +13,8 @@ const ActivityFill = () => {
   const location = useLocation();
   const { farm, pond_id, pond_name, active_pond_id, activity_id, activites } =
     location.state ?? {};
+
+  console.log(farm, pond_id, pond_name, active_pond_id, activity_id, activites);
   // set state
   const [selectFarm, setSelectFarm] = useState({
     farm: farm ?? "ฟาร์ม 1",
@@ -118,8 +120,9 @@ const ActivityFill = () => {
     };
 
     // check if same pond or not
+    console.log("active_pond_id = ", active_pond_id);
     const tempActivePondId =
-      pond_name === selectFarm.pondName ? activePondId : -1;
+      pond_name === selectFarm.pondName ? active_pond_id : -1;
 
     const resetState = (apId, activities) => {
       history.push({
@@ -336,7 +339,7 @@ const ActivityFill = () => {
                   pond_id: selectFarm.pondId,
                   pond_name: selectFarm.pondName,
                   active_pond_id: activePondId,
-                  activity_id: activePondId,
+                  activity_id: activity_id,
                   activites: pondActivities,
                 },
               }}
