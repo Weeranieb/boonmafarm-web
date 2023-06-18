@@ -1,31 +1,180 @@
-import React, { useState } from "react";
+import { Fragment, useState } from "react";
+import { Link, useLocation, useHistory } from "react-router-dom";
 import SearchFarm from "../ui-components/SearchFarm";
-import { Link } from "react-router-dom";
 import "./Activity.css";
 import "./General.css";
+import { fetchData } from "../utils/fetch";
 import TableRows from "../components/TableRows";
 import SelectActivity from "../ui-components/SelectActivity";
+import { pondNameMapId, rowDailyFeeds } from "../utils/pond";
+import { activityDictionaryMap } from "../utils/activity";
 
 const ActivitySell = () => {
+  const history = useHistory();
+  const location = useLocation();
+  const { farm, pond_id, pond_name, active_pond_id, activity_id, activities } =
+    location.state ?? {};
+  let newSellId = -1;
+
+  //set state
   const [rows, initRow] = useState([]);
-  const addRowTable = () => {
-    const data = {
-      name: "",
-      email: "",
-      profile: "",
+  const [selectFarm, setSelectFarm] = useState({
+    farm: farm ?? "ฟาร์ม 1",
+    pondName: pond_name ?? "1ซ้าย",
+    pondId: pond_id ?? 1,
+    pondList: farm ? rowDailyFeeds.get(farm) : rowDailyFeeds.get("ฟาร์ม 1"),
+  });
+  const [pondActivities, setPondActivities] = useState(activities || []);
+  const [activePondId, setActivePondId] = useState(active_pond_id ?? -1);
+  const [shouldRefresh, setShouldRefresh] = useState(false);
+
+  // set main stateful variables
+  const [sellData, setSellData] = useState({
+    date_issued: "",
+    // sell_detail: [],  devide into two part
+    sum_profit: 0,
+  });
+
+  //  {
+  //   index:-1,
+  //   size:"",
+  //   total_amount:0,
+  //   price_per_kilo:0,
+  //   profit: 0,
+  // }
+
+  //? Handler
+  const handleChangePond = (event) => {
+    event.preventDefault();
+    const value = event.target.value;
+    const name = event.target.name;
+    let tempPondId;
+
+    if (name === "farm") {
+      const ponds = rowDailyFeeds.get(value);
+      if (ponds.length > 0) {
+        // setPondlist(ponds);
+        setSelectFarm((prevState) => ({
+          ...prevState,
+          pondName: ponds[0].name,
+          pondList: ponds,
+        }));
+        tempPondId = pondNameMapId.get(ponds[0].name);
+      }
+    } else {
+      tempPondId = pondNameMapId.get(value);
+    }
+    setSelectFarm((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+
+    setSelectFarm((prevState) => ({
+      ...prevState,
+      pondId: tempPondId,
+    }));
+  };
+
+  const handleSearchPond = (event) => {
+    event.preventDefault();
+    setSellData({
+      date_issued: "",
+      sell_detail: [],
+      sum_profit: 0,
+    });
+
+    const headers = new Headers();
+    headers.append("Content-Type", "application/json");
+
+    const requestOptions = {
+      method: "GET",
+      headers: headers,
     };
+
+    // check if same pond or not
+    const tempActivePondId =
+      pond_name === selectFarm.pondName ? active_pond_id : -1;
+
+    const resetState = (apId, activities) => {
+      history.push({
+        pathname: "/fillData/sell", // or the current path if needed
+        state: {
+          farm: selectFarm.farm,
+          pond_id: selectFarm.pondId,
+          pond_name: selectFarm.pondName,
+          active_pond_id: apId,
+          activity_id: undefined,
+          activities: activities || [],
+        },
+      });
+    };
+
+    const getPondActivity = (apId) => {
+      fetchData(
+        `${process.env.REACT_APP_BACKEND}/api/v1/activity/getPondActivities?active_pond_id=${apId}`,
+        requestOptions
+      ).then((result) => {
+        if (result) {
+          setPondActivities(result);
+          setActivePondId(apId);
+          // Update location.state with the new values
+          resetState(apId, result);
+        } else {
+          resetState(tempActivePondId);
+          setPondActivities([]);
+        }
+      });
+    };
+
+    if (tempActivePondId > 0) getPondActivity(tempActivePondId);
+    else {
+      let url = `/api/v1/master/getActivePondDetail?pond_id=${selectFarm.pondId}`;
+      fetchData(`${process.env.REACT_APP_BACKEND}${url}`, requestOptions).then(
+        (result) => {
+          if (result) {
+            getPondActivity(result.active_pond_id);
+          } else {
+            resetState();
+            setPondActivities([]);
+          }
+        }
+      );
+    }
+  };
+
+  const addRowTable = () => {
+    const rowLength = rows.length;
+    const data = {
+      no: rowLength + 1,
+      sell_id: newSellId,
+      size: "", // Set an initial value for size
+      total_amount: 0, // Set an initial value for total_amount
+      price_per_kilo: 0, // Set an initial value for price_per_kilo
+      total: 0, // Set an initial value for total
+    };
+    newSellId--;
     initRow([...rows, data]);
   };
+
   const tableRowRemove = (index) => {
     const dataRow = [...rows];
     dataRow.splice(index, 1);
     initRow(dataRow);
   };
+
   const onValUpdate = (i, event) => {
     const { name, value } = event.target;
     const data = [...rows];
     data[i][name] = value;
+    if (data[i].total_amount && data[i].price_per_kilo) {
+      const amount = Number(data[i].total_amount);
+      const price = Number(data[i].price_per_kilo);
+      data[i].total = amount * price;
+
+      // set total_profit from sell_data
+    }
     initRow(data);
+    console.log("rows are here", rows);
   };
 
   return (
@@ -119,8 +268,11 @@ const ActivitySell = () => {
         </div>
         <div className="col">
           <div className="text-end select-date mb-4">
-            <form action="#!">
-              <SearchFarm />
+            <form onSubmit={handleSearchPond}>
+              <SearchFarm
+                onChange={handleChangePond}
+                property_pond={selectFarm}
+              />
             </form>
           </div>
           <div className="border border-2 rounded rounded-3 p-2 justify-content-between">
@@ -137,31 +289,46 @@ const ActivitySell = () => {
                 </tr>
               </thead>
               <tbody className="text-center">
-                <tr>
-                  <td>17 ธ.ค. 2565</td>
-                  <td>ลงปลา</td>
-                  <td>แก้ไข</td>
-                </tr>
-                <tr>
-                  <td>15 ก.ค. 2565</td>
-                  <td>ย้ายปลา</td>
-                  <td>แก้ไข</td>
-                </tr>
-                <tr>
-                  <td>24 พ.ค. 2565</td>
-                  <td>ย้ายปลา</td>
-                  <td>แก้ไข</td>
-                </tr>
-                <tr>
-                  <td>12 พ.ค. 2565</td>
-                  <td>ลงปลาจากบ่อ</td>
-                  <td>แก้ไข</td>
-                </tr>
-                <tr>
-                  <td>01 พ.ค. 2565</td>
-                  <td>ขาย</td>
-                  <td>แก้ไข</td>
-                </tr>
+                {pondActivities.slice(0, 6).map((activity, index) => (
+                  <Fragment key={index}>
+                    <tr>
+                      <td>{activity.date}</td>
+                      <td>
+                        <span
+                          className={
+                            activity.activity_type === "fill" &&
+                            activity.activity_id === activity_id
+                              ? "bg-info"
+                              : ""
+                          }
+                        >
+                          {activity.activity_type === "move"
+                            ? activity.detail
+                            : activityDictionaryMap.get(activity.activity_type)}
+                        </span>
+                      </td>
+                      <td>
+                        <Link
+                          to={{
+                            pathname: `/fillData/${activity.activity_type}`,
+                            state: {
+                              farm: selectFarm.farm,
+                              pond_id: selectFarm.pondId,
+                              pond_name: selectFarm.pondName,
+                              active_pond_id: activePondId,
+                              activity_id: activity.activity_id,
+                              activities: pondActivities,
+                            },
+                          }}
+                          className="link-dark"
+                          onClick={() => setShouldRefresh(true)}
+                        >
+                          แก้ไข
+                        </Link>
+                      </td>
+                    </tr>
+                  </Fragment>
+                ))}
               </tbody>
             </table>
           </div>

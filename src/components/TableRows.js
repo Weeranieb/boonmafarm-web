@@ -1,6 +1,6 @@
 function TableRows({ rows, tableRowRemove, onValUpdate }) {
   return rows.map((rowsData, index) => {
-    const { no, size, amount, price, total } = rowsData;
+    const { no, size, total_amount, price_per_kilo, total } = rowsData;
     return (
       <tr key={index}>
         <td className="text-center">{no}</td>
@@ -29,18 +29,20 @@ function TableRows({ rows, tableRowRemove, onValUpdate }) {
         <td>
           <input
             type="text"
-            value={amount}
+            inputMode="numeric"
+            value={total_amount}
             onChange={(event) => onValUpdate(index, event)}
-            name="amount"
+            name="total_amount"
             className="form-control"
           />
         </td>
         <td>
           <input
             type="text"
-            value={price}
+            inputMode="numeric"
+            value={price_per_kilo}
             onChange={(event) => onValUpdate(index, event)}
-            name="price"
+            name="price_per_kilo"
             className="form-control"
           />
         </td>

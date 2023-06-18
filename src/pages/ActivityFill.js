@@ -10,7 +10,6 @@ import { activityDictionaryMap } from "../utils/activity";
 import { changeTimeUTCToThaiDate } from "../utils/date";
 
 // TODO 1. add warning when fill is not enough and not save until fulfill
-// TODO 2. send state value to another page in fillData
 const ActivityFill = () => {
   const history = useHistory();
   const location = useLocation();
