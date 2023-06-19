@@ -14,9 +14,9 @@ const ActivitySell = () => {
   const location = useLocation();
   const { farm, pond_id, pond_name, active_pond_id, activity_id, activities } =
     location.state ?? {};
-  let newSellId = -1;
 
   //set state
+  const [newSellDetailId, setNewSellDetailId] = useState(-1);
   const [rows, initRow] = useState([]);
   const [selectFarm, setSelectFarm] = useState({
     farm: farm ?? "ฟาร์ม 1",
@@ -63,10 +63,11 @@ const ActivitySell = () => {
               0,
               10
             );
-            const updatedRows = result.detail.map((row) => ({
+            const updatedRows = result.detail.map((row, index) => ({
               ...row,
               isShow: true,
               total: row.total_amount * row.price_per_kilo,
+              no: index + 1,
             }));
             initRow(updatedRows);
             const initProfit = result.detail.reduce(
@@ -195,33 +196,60 @@ const ActivitySell = () => {
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    console.log(sellData, rows);
+    const tempActivePondId = active_pond_id || -1;
+    const sellId = sellData.sell_id || -1;
+
+    // set sellDetail
+    const sellDetail = [];
+    for (const detail of rows) {
+      detail.total_amount = Number(detail.total_amount);
+      detail.price_per_kilo = Number(detail.price_per_kilo);
+      detail.date_issued = sellData.date_issued;
+      detail.record_status = detail.isShow ? "A" : "S";
+      detail.sell_id = sellId;
+      if (detail.sell_detail_id > 0 || detail.record_status === "A") {
+        sellDetail.push(detail);
+      }
+    }
+
+    const requestBody = {
+      pond_id: selectFarm.pondId,
+      active_pond_id: tempActivePondId,
+      sell_id: sellId,
+      sell_history: {
+        sell_id: sellId,
+        active_pond_id: tempActivePondId,
+        merchant_id: 1,
+        additional_cost: 10000,
+        date_issued: `${sellData.date_issued}T00:00:00Z`,
+        record_status: "A",
+      },
+      sell_detail: sellDetail,
+    };
+
+    console.log("request body", requestBody);
+
+    // prepare to save in
   };
 
   const addRowTable = () => {
     const rowLength = rows.length;
     const data = {
       no: rowLength + 1,
-      sell_id: newSellId,
-      size: "", // Set an initial value for size
+      sell_detail_id: newSellDetailId,
+      size: "ปลา 9", // Set an initial value for size
       total_amount: 0, // Set an initial value for total_amount
       price_per_kilo: 0, // Set an initial value for price_per_kilo
       total: 0, // Set an initial value for total
       isShow: true,
     };
-    newSellId--;
+    setNewSellDetailId(newSellDetailId - 1);
     initRow([...rows, data]);
   };
 
   const tableRowRemove = (index) => {
     const dataRow = [...rows];
     dataRow[index].isShow = false;
-    // dataRow.splice(index, 1);
-    // set total_profit from sell_data
-    // const totalProfit = dataRow.reduce(
-    //   (accumulator, sell) => accumulator + sell.total,
-    //   0
-    // );
     const totalProfit = dataRow.reduce((accumulator, sell) => {
       if (sell.isShow) {
         return accumulator + sell.total;
@@ -246,10 +274,12 @@ const ActivitySell = () => {
       data[i].total = amount * price;
 
       // set total_profit from sell_data
-      const totalProfit = data.reduce(
-        (accumulator, sell) => accumulator + sell.total,
-        0
-      );
+      const totalProfit = data.reduce((accumulator, sell) => {
+        if (sell.isShow) {
+          return accumulator + sell.total;
+        }
+        return accumulator;
+      }, 0);
 
       setSellData((prevState) => ({
         ...prevState,
@@ -257,7 +287,6 @@ const ActivitySell = () => {
       }));
     }
     initRow(data);
-    console.log("rows are here", rows);
   };
 
   return (
