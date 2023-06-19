@@ -1,4 +1,4 @@
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Link, useLocation, useHistory } from "react-router-dom";
 import SearchFarm from "../ui-components/SearchFarm";
 import "./Activity.css";
@@ -30,18 +30,58 @@ const ActivitySell = () => {
 
   // set main stateful variables
   const [sellData, setSellData] = useState({
+    sell_id: activity_id ?? -1,
     date_issued: "",
-    // sell_detail: [],  devide into two part
     sum_profit: 0,
   });
 
-  //  {
-  //   index:-1,
-  //   size:"",
-  //   total_amount:0,
-  //   price_per_kilo:0,
-  //   profit: 0,
-  // }
+  //? use Effect
+  useEffect(() => {
+    if (shouldRefresh) {
+      window.location.reload();
+    }
+
+    let sellId = sellData.sell_id;
+    if (sellId > 0 && activePondId > 0) {
+      const headers = new Headers();
+      headers.append("Content-Type", "application/json");
+
+      const requestOptions = {
+        method: "GET",
+        headers: headers,
+      };
+
+      fetchData(
+        `${process.env.REACT_APP_BACKEND}/api/v1/activity/getSellHistory?active_pond_id=${activePondId}&sell_id=${sellId}`,
+        requestOptions
+      ).then((result) => {
+        if (result) {
+          if (result.error) console.log(result.error);
+          else {
+            console.log("result issss", result);
+            result.history.date_issued = result.history.date_issued.substring(
+              0,
+              10
+            );
+            const updatedRows = result.detail.map((row) => ({
+              ...row,
+              isShow: true,
+              total: row.total_amount * row.price_per_kilo,
+            }));
+            initRow(updatedRows);
+            const initProfit = result.detail.reduce(
+              (accumulator, sell) =>
+                accumulator + sell.total_amount * sell.price_per_kilo,
+              0
+            );
+            result.history.sum_profit = initProfit;
+            setSellData(result.history);
+            console.log("our rows are", rows);
+          }
+        }
+      });
+    }
+  }, [activePondId, shouldRefresh]);
 
   //? Handler
   const handleChangePond = (event) => {
@@ -142,6 +182,22 @@ const ActivitySell = () => {
     }
   };
 
+  const handleChange = (event) => {
+    event.preventDefault();
+    let { value, name } = event.target;
+    value = value || ""; // Use an empty string as the default value if undefined
+    setSellData((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+
+    console.log(sellData, rows);
+  };
+
   const addRowTable = () => {
     const rowLength = rows.length;
     const data = {
@@ -151,6 +207,7 @@ const ActivitySell = () => {
       total_amount: 0, // Set an initial value for total_amount
       price_per_kilo: 0, // Set an initial value for price_per_kilo
       total: 0, // Set an initial value for total
+      isShow: true,
     };
     newSellId--;
     initRow([...rows, data]);
@@ -158,7 +215,24 @@ const ActivitySell = () => {
 
   const tableRowRemove = (index) => {
     const dataRow = [...rows];
-    dataRow.splice(index, 1);
+    dataRow[index].isShow = false;
+    // dataRow.splice(index, 1);
+    // set total_profit from sell_data
+    // const totalProfit = dataRow.reduce(
+    //   (accumulator, sell) => accumulator + sell.total,
+    //   0
+    // );
+    const totalProfit = dataRow.reduce((accumulator, sell) => {
+      if (sell.isShow) {
+        return accumulator + sell.total;
+      }
+      return accumulator;
+    }, 0);
+
+    setSellData((prevState) => ({
+      ...prevState,
+      sum_profit: totalProfit,
+    }));
     initRow(dataRow);
   };
 
@@ -172,6 +246,15 @@ const ActivitySell = () => {
       data[i].total = amount * price;
 
       // set total_profit from sell_data
+      const totalProfit = data.reduce(
+        (accumulator, sell) => accumulator + sell.total,
+        0
+      );
+
+      setSellData((prevState) => ({
+        ...prevState,
+        sum_profit: totalProfit,
+      }));
     }
     initRow(data);
     console.log("rows are here", rows);
@@ -183,88 +266,115 @@ const ActivitySell = () => {
       <hr />
       <div className="row">
         <div className="col-6">
-          <SelectActivity act={"sell"} />
-          <div className="input">
-            <form action="#!" id="activity"></form>
-            <table className="text-center table table-borderless" width="100%">
-              <tbody>
-                <tr>
-                  <td className="text-end pe-4">
-                    <label htmlFor="date">วันที่ลงปลา:</label>
-                  </td>
-                  <td className="text-start">
-                    <input
-                      type="date"
-                      name="date"
-                      id="date"
-                      form="activity"
-                      className="form-control form-control-sm"
-                      style={{ width: "185px" }}
-                    />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div>
+          <SelectActivity
+            act={"sell"}
+            farm={farm}
+            pond_id={pond_id}
+            pond_name={pond_name}
+            active_pond_id={active_pond_id}
+            activity_id={activity_id}
+            activities={activities}
+          />
+          <form onSubmit={handleSubmit}>
+            <div className="input">
+              <table
+                className="text-center table table-borderless"
+                width="100%"
+              >
+                <tbody>
+                  <tr>
+                    <td className="text-end pe-4">
+                      <label htmlFor="date">วันที่ลงปลา:</label>
+                    </td>
+                    <td className="text-start">
+                      <input
+                        type="date"
+                        name="date_issued"
+                        id="date_issued"
+                        className="form-control form-control-sm"
+                        style={{ width: "185px" }}
+                        value={sellData.date_issued}
+                        onChange={handleChange}
+                      />
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
             {/* new table */}
-            <table className="table table-borderless">
-              <thead>
-                <tr className="text-center">
-                  <th>ดัชนี</th>
-                  <th>ไซส์</th>
-                  <th>จำนวนปลา (กก.)</th>
-                  <th>ราคาปลาต่อกิโล</th>
-                  <th>ขายได้</th>
-                  <th>
-                    <button
-                      className="btn btn-danger btn-sm"
-                      onClick={addRowTable}
-                    >
-                      Insert Row
-                    </button>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <TableRows
-                  rows={rows}
-                  tableRowRemove={tableRowRemove}
-                  onValUpdate={onValUpdate}
-                />
-                <tr>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td className="text-end align-middle">รายได้ทั้งหมด</td>
-                  <td>
-                    <input
-                      type="text"
-                      value="0"
-                      name="all"
-                      className="form-control"
-                      disabled
-                    />
-                  </td>
-                  <td></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div style={{ height: "20px" }}></div>
-          <button className="btn btn-primary btn-sm">Save</button>
-          <Link
-            to="/fillData/feed-price"
-            className="btn btn-warning ms-1 btn-sm"
-          >
-            Cancel
-          </Link>
-          <Link
-            to="/fillData/feed-price"
-            className="btn btn-danger ms-1 btn-sm"
-          >
-            Delete
-          </Link>
+            <div>
+              <table className="table table-borderless">
+                <thead>
+                  <tr className="text-center">
+                    <th>ดัชนี</th>
+                    <th>ไซส์</th>
+                    <th>จำนวนปลา (กก.)</th>
+                    <th>ราคาปลาต่อกิโล</th>
+                    <th>ขายได้</th>
+                    <th>
+                      <button
+                        className="btn btn-danger btn-sm"
+                        onClick={addRowTable}
+                      >
+                        Insert Row
+                      </button>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {/* FIXME should select size should be minimized  */}
+                  <TableRows
+                    rows={rows}
+                    tableRowRemove={tableRowRemove}
+                    onValUpdate={onValUpdate}
+                  />
+                  <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td className="text-end align-middle">รายได้ทั้งหมด</td>
+                    <td>
+                      <input
+                        type="text"
+                        value={sellData.sum_profit}
+                        name="sum_profit"
+                        className="form-control"
+                        onChange={handleChange}
+                        disabled
+                      />
+                    </td>
+                    <td></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div style={{ height: "20px" }}></div>
+            <button className="btn btn-primary btn-sm">บันทึก</button>
+            <Link
+              to={{
+                pathname: `/fillData/sell`,
+                state: {
+                  farm: selectFarm.farm,
+                  pond_id: selectFarm.pondId,
+                  pond_name: selectFarm.pondName,
+                  active_pond_id: activePondId,
+                  activity_id: activity_id,
+                  activities: pondActivities,
+                },
+              }}
+              className="btn btn-warning ms-1 btn-sm"
+              onClick={() => setShouldRefresh(true)}
+            >
+              ยกเลิก
+            </Link>
+            <Link
+              to="#!"
+              className="btn btn-danger ms-1 btn-sm ps-3 pe-3"
+              onClick={() => console.log("not implement")}
+            >
+              ลบ
+            </Link>
+          </form>
         </div>
         <div className="col">
           <div className="text-end select-date mb-4">

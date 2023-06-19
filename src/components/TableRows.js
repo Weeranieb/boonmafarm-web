@@ -1,29 +1,30 @@
 function TableRows({ rows, tableRowRemove, onValUpdate }) {
   return rows.map((rowsData, index) => {
-    const { no, size, total_amount, price_per_kilo, total } = rowsData;
+    const { no, size, total_amount, price_per_kilo, total, isShow } = rowsData;
     return (
-      <tr key={index}>
+      <tr key={index} style={!isShow ? { display: "none" } : {}}>
         <td className="text-center">{no}</td>
         <td>
           <select
-            name={size}
+            name="size"
             className="form-select "
             style={{ width: "100px" }}
             onChange={(event) => onValUpdate(index, event)}
+            value={size}
           >
-            <option value="fish 9">ปลา 9</option>
-            <option value="fish 8">ปลา 8</option>
-            <option value="fish 7">ปลา 7</option>
-            <option value="fish 6">ปลา 6</option>
-            <option value="fish 5">ปลา 5</option>
-            <option value="fish 4">ปลา 4</option>
-            <option value="fish 3">ปลา 3</option>
-            <option value="fish 2">ปลา 2</option>
-            <option value="fish 1">ปลา 1</option>
-            <option value="fish small">ปลาเล็ก</option>
-            <option value="fish handicapped">ปลาพิการ</option>
-            <option value="fish thin">ปลาผอม</option>
-            <option value="fish wounded">ปลาแผล</option>
+            <option value="ปลา 9">ปลา 9</option>
+            <option value="ปลา 8">ปลา 8</option>
+            <option value="ปลา 7">ปลา 7</option>
+            <option value="ปลา 6">ปลา 6</option>
+            <option value="ปลา 5">ปลา 5</option>
+            <option value="ปลา 4">ปลา 4</option>
+            <option value="ปลา 3">ปลา 3</option>
+            <option value="ปลา 2">ปลา 2</option>
+            <option value="ปลา 1">ปลา 1</option>
+            <option value="ปลาเล็ก">ปลาเล็ก</option>
+            <option value="ปลาพิการ">ปลาพิการ</option>
+            <option value="ปลาเล็ก">ปลาผอม</option>
+            <option value="ปลาแผล">ปลาแผล</option>
           </select>
         </td>
         <td>
