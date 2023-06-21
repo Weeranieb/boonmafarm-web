@@ -233,7 +233,6 @@ const ActivityFill = () => {
       .then((response) => response.json())
       .then((data) => {
         if (data.result) {
-          console.log("result after save", data.result);
           refreshStateAfterSave(data.result);
         } else {
           console.log(data.error);

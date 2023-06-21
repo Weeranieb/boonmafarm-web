@@ -1,6 +1,105 @@
+import { Fragment, useState } from "react";
+import { Link, useLocation, useHistory } from "react-router-dom";
 import SearchDate from "../ui-components/SearchDate";
 import "./Bill.css";
+import { fetchData } from "../utils/fetch";
 const Bill = () => {
+  // state by location
+  const history = useHistory();
+  const location = useLocation();
+  const { month, year, worker_salary, electricity_bill } = location.state ?? {};
+  console.log(
+    "all state variables",
+    month,
+    year,
+    worker_salary,
+    electricity_bill
+  );
+  const tempDate = new Date();
+  const [date, setDate] = useState({
+    month: month || tempDate.getMonth() + 1,
+    year: year || tempDate.getFullYear(),
+  });
+
+  const [bill, setBill] = useState({
+    worker_salary: { cost: worker_salary || 0, bill_id: -1 },
+    electricity_bill: { cost: electricity_bill || 0, bill_id: -2 },
+  });
+
+  const handleChange = (event) => {
+    let value = event.target.value;
+    let name = event.target.name;
+    setDate((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+
+  const handleChangeBill = (event) => {
+    let value = event.target.value;
+    let name = event.target.name;
+    setBill((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+
+  const handleSearch = (event) => {
+    event.preventDefault();
+
+    setBill({
+      worker_salary: { cost: worker_salary || 0, bill_id: -1 },
+      electricity_bill: { cost: electricity_bill || 0, bill_id: -2 },
+    });
+
+    const headers = new Headers();
+    headers.append("Content-Type", "application/json");
+
+    const requestOptions = {
+      method: "GET",
+      headers: headers,
+    };
+
+    const resetState = () => {
+      history.push({
+        pathname: "/fillData/bill",
+        state: {
+          month: date.month,
+          year: date.year,
+          worker_salary: bill.worker_salary,
+          electricity_bill: bill.electricity_bill,
+        },
+      });
+    };
+
+    fetchData(
+      `${process.env.REACT_APP_BACKEND}/api/v1/master/getBillByDate?month=${date.month}&year=${date.year}`,
+      requestOptions
+    ).then((result) => {
+      if (!result.error) {
+        const obj = {};
+        console.log("result", result);
+        for (const [billType, bill] of Object.entries(result)) {
+          obj[billType] = {
+            bill_id: bill.bill_id,
+            cost: bill.cost,
+          };
+        }
+
+        console.log(obj);
+        setBill(obj);
+        console.log("this is new bill", bill);
+        resetState();
+      } else {
+        resetState();
+        setBill({
+          worker_salary: { cost: worker_salary || 0, bill_id: -1 },
+          electricity_bill: { cost: electricity_bill || 0, bill_id: -2 },
+        });
+      }
+    });
+  };
+
   return (
     <div>
       <div className="bill-header">ค่าใช้จ่ายรายเดือน</div>
@@ -25,6 +124,8 @@ const Bill = () => {
                     inputMode="numeric"
                     className="form-control form-control-sm"
                     style={{ width: "100px" }}
+                    onChange={handleChangeBill}
+                    value={bill.electricity_bill?.cost || 0}
                   />
                   <br />
                   <br />
@@ -38,6 +139,8 @@ const Bill = () => {
                     inputMode="numeric"
                     className="form-control form-control-sm"
                     style={{ width: "100px" }}
+                    onChange={handleChangeBill}
+                    value={bill.worker_salary?.cost || 0}
                   />
                 </form>
               </div>
@@ -56,9 +159,9 @@ const Bill = () => {
           </div>
           <div className="col">
             <div className="text-end">
-              <form action="#!">
+              <form onSubmit={handleSearch}>
                 <div className="mb-4">
-                  <SearchDate />
+                  <SearchDate onChange={handleChange} date={date} />
                 </div>
               </form>
             </div>

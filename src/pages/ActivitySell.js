@@ -8,6 +8,7 @@ import TableRows from "../components/TableRows";
 import SelectActivity from "../ui-components/SelectActivity";
 import { pondNameMapId, rowDailyFeeds } from "../utils/pond";
 import { activityDictionaryMap } from "../utils/activity";
+import { changeTimeUTCToThaiDate } from "../utils/date";
 
 const ActivitySell = () => {
   const history = useHistory();
@@ -230,6 +231,53 @@ const ActivitySell = () => {
     console.log("request body", requestBody);
 
     // prepare to save in
+    const headers = new Headers();
+    headers.append("Content-Type", "application/json");
+
+    let requestOptions = {
+      body: JSON.stringify(requestBody),
+      method: "POST",
+      headers: headers,
+    };
+
+    fetch(
+      `${process.env.REACT_APP_BACKEND}/api/v1/activity/saveSellHistory`,
+      requestOptions
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.result) {
+          console.log("result after save", data.result);
+          refreshStateAfterSave(data.result);
+        } else {
+          console.log(data.error);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
+    const refreshStateAfterSave = (sellHistory) => {
+      // if it's new than new save
+      if (sellId < 0)
+        pondActivities.unshift({
+          activity_id: sellHistory.sell_id,
+          activity_type: "sell",
+          date: changeTimeUTCToThaiDate(sellHistory.history.date_issued),
+          detail: `ขายปลา บ่อ ${pond_name}`,
+        });
+      history.push({
+        pathname: "/fillData/sell", // or the current path if needed
+        state: {
+          farm: selectFarm.farm,
+          pond_id: selectFarm.pondId,
+          pond_name: selectFarm.pondName,
+          active_pond_id: sellHistory.history.active_pond_id,
+          activity_id: sellHistory.history.fill_in_id,
+          activities: pondActivities,
+        },
+      });
+    };
   };
 
   const addRowTable = () => {
@@ -304,6 +352,8 @@ const ActivitySell = () => {
             activity_id={activity_id}
             activities={activities}
           />
+          {/* <form> */}
+          {/* FIXME 2 buttons in same form */}
           <form onSubmit={handleSubmit}>
             <div className="input">
               <table
@@ -435,7 +485,7 @@ const ActivitySell = () => {
                       <td>
                         <span
                           className={
-                            activity.activity_type === "fill" &&
+                            activity.activity_type === "sell" &&
                             activity.activity_id === activity_id
                               ? "bg-info"
                               : ""
