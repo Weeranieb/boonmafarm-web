@@ -9,16 +9,9 @@ const Bill = () => {
   // state by location
   const history = useHistory();
   const location = useLocation();
-  const { month, year, worker_salary, electricity_bill, bill_histories } =
-    location.state ?? {};
-  console.log(
-    "all state variables",
-    month,
-    year,
-    worker_salary,
-    electricity_bill,
-    bill_histories
-  );
+  const { month, year, bill_histories } = location.state || {};
+  console.log("all state variables", month, year, bill_histories);
+
   const tempDate = new Date();
   const [billHistories, setBillHistories] = useState(bill_histories || []);
   const [shouldRefresh, setShouldRefresh] = useState(false);
@@ -27,22 +20,61 @@ const Bill = () => {
     year: year || tempDate.getFullYear(),
   });
 
-  const [state, setState] = useState({
-    month: date.month,
-    year: date.year,
-    worker_salary: undefined,
-    electricity_bill: undefined,
-    bill_histories: [],
-  });
+  console.log(date, month, year);
 
   const [bill, setBill] = useState({
-    worker_salary: worker_salary,
-    electricity_bill: electricity_bill,
+    // worker_salary: worker_salary,
+    // electricity_bill: electricity_bill,
   });
+
+  useEffect(() => {
+    if (shouldRefresh) {
+      window.location.reload();
+    }
+
+    const tempMonth = date.month;
+    const tempYear = date.year;
+
+    const headers = new Headers();
+    headers.append("Content-Type", "application/json");
+
+    const requestOptions = {
+      method: "GET",
+      headers: headers,
+    };
+
+    fetchData(
+      `${process.env.REACT_APP_BACKEND}/api/v1/master/getBillList`,
+      requestOptions
+    ).then((result) => {
+      if (!result.error) {
+        setBillHistories(result);
+        console.log("bill history", result);
+      }
+    });
+
+    fetchData(
+      `${process.env.REACT_APP_BACKEND}/api/v1/master/getBillByDate?month=${tempMonth}&year=${tempYear}`,
+      requestOptions
+    ).then((result) => {
+      if (!result.error) {
+        const obj = {};
+        for (const [billType, bill] of Object.entries(result)) {
+          obj[billType] = {
+            bill_id: bill.bill_id,
+            cost: bill.cost,
+          };
+        }
+        setBill(obj);
+        console.log("bill", obj);
+      }
+    });
+  }, [date, shouldRefresh]);
 
   const handleChange = (event) => {
     let value = event.target.value;
     let name = event.target.name;
+    console.log("name value", name, value);
     setDate((prevState) => ({
       ...prevState,
       [name]: value,
@@ -63,24 +95,12 @@ const Bill = () => {
   const handleSearch = (event) => {
     event.preventDefault();
 
-    setBill({
-      worker_salary: { cost: worker_salary || 0, bill_id: -1 },
-      electricity_bill: { cost: electricity_bill || 0, bill_id: -2 },
-    });
-
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
 
     const requestOptions = {
       method: "GET",
       headers: headers,
-    };
-
-    const resetState = (obj) => {
-      history.push({
-        pathname: "/fillData/bill",
-        state: state,
-      });
     };
 
     fetchData(
@@ -97,31 +117,17 @@ const Bill = () => {
         }
         setBill(obj);
         console.log(obj);
-        setState((prevState) => ({
-          ...prevState,
-          worker_salary: obj?.worker_salary,
-          electricity_bill: obj?.electricity_bill,
-        }));
       }
     });
-
-    fetchData(
-      `${process.env.REACT_APP_BACKEND}/api/v1/master/getBillList`,
-      requestOptions
-    ).then((result) => {
-      if (!result.error) {
-        setBillHistories(result);
-        console.log("history", result);
-        setState((prevState) => ({
-          ...prevState,
-          bill_histories: result,
-        }));
-      }
-    });
-
-    console.log(state);
-    resetState();
-    setShouldRefresh(shouldRefresh);
+    // fetchData(
+    //   `${process.env.REACT_APP_BACKEND}/api/v1/master/getBillList`,
+    //   requestOptions
+    // ).then((result) => {
+    //   if (!result.error) {
+    //     setBillHistories(result);
+    //     console.log("history", result);
+    //   }
+    // });
   };
 
   const handleSave = (event) => {
@@ -202,44 +208,6 @@ const Bill = () => {
     };
   };
 
-  useEffect(() => {
-    if (shouldRefresh) {
-      window.location.reload();
-    }
-    // Perform actions that depend on the updated state
-    const tempMonth = month;
-    const tempYear = year;
-    const headers = new Headers();
-    headers.append("Content-Type", "application/json");
-
-    const requestOptions = {
-      method: "GET",
-      headers: headers,
-    };
-
-    fetchData(
-      `${process.env.REACT_APP_BACKEND}/api/v1/master/getBillByDate?month=${tempMonth}&year=${tempYear}`,
-      requestOptions
-    ).then((result) => {
-      if (!result.error) {
-        const obj = {};
-        for (const [billType, bill] of Object.entries(result)) {
-          obj[billType] = {
-            bill_id: bill.bill_id,
-            cost: bill.cost,
-          };
-        }
-        setBill(obj);
-        console.log(obj);
-        setState((prevState) => ({
-          ...prevState,
-          worker_salary: obj?.worker_salary,
-          electricity_bill: obj?.electricity_bill,
-        }));
-      }
-    });
-  }, [month, year]);
-
   return (
     <div>
       <div className="bill-header">ค่าใช้จ่ายรายเดือน</div>
@@ -319,7 +287,7 @@ const Bill = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {billHistories.slice(0, 6).map((temp, index) => (
+                  {billHistories.slice(0, 5).map((temp, index) => (
                     <Fragment key={index}>
                       <tr>
                         <td className="text-left">{temp.date}</td>
@@ -334,12 +302,12 @@ const Bill = () => {
                             to={{
                               pathname: `/fillData/bill`,
                               state: {
-                                month: temp.month - 1,
-                                year: temp.year,
+                                month: String(temp.month),
+                                year: String(temp.year),
                               },
                             }}
                             className="link-dark text-center"
-                            // onClick={() => setShouldRefresh(true)}
+                            onClick={() => setShouldRefresh(true)}
                           >
                             แก้ไข
                           </Link>
