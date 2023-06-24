@@ -39,9 +39,6 @@ const Bill = () => {
       window.location.reload();
     }
 
-    // const tempMonth = date.month;
-    // const tempYear = date.year;
-
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
 
@@ -77,7 +74,7 @@ const Bill = () => {
     // });
   }, [shouldRefresh]);
 
-  const fetchBillByDate = (month, year) => {
+  const fetchBillByDate = (iMonth, iYear) => {
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
 
@@ -87,7 +84,7 @@ const Bill = () => {
     };
 
     fetchData(
-      `${process.env.REACT_APP_BACKEND}/api/v1/master/getBillByDate?month=${date.month}&year=${date.year}`,
+      `${process.env.REACT_APP_BACKEND}/api/v1/master/getBillByDate?month=${iMonth}&year=${iYear}`,
       requestOptions
     ).then((result) => {
       if (!result.error) {
@@ -286,7 +283,7 @@ const Bill = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {/* {billHistories.slice(0, 5).map((temp, index) => (
+                  {billHistories.slice(0, 5).map((temp, index) => (
                     <Fragment key={index}>
                       <tr>
                         <td className="text-left">{temp.date}</td>
@@ -303,51 +300,25 @@ const Bill = () => {
                               state: {
                                 month: String(temp.month),
                                 year: String(temp.year),
+                                electricity_bill: bill.electricity_bill,
+                                worker_salary: bill.worker_salary,
                               },
                             }}
                             className="link-dark text-center"
-                            onClick={() => setShouldRefresh(true)}
+                            onClick={() => {
+                              fetchBillByDate(temp.month, temp.year);
+                              setDate({
+                                month: temp.month,
+                                year: temp.year,
+                              });
+                            }}
                           >
                             แก้ไข
                           </Link>
                         </td>
                       </tr>
                     </Fragment>
-                  ))} */}
-                  {billHistories.slice(0, 5).map((temp, index) => {
-                    fetchBillByDate(temp.month, temp.year);
-
-                    return (
-                      <Fragment key={index}>
-                        <tr>
-                          <td className="text-left">{temp.date}</td>
-                          <td className="text-center">
-                            {temp.bill[billConst.electricity_bill] || "-"}
-                          </td>
-                          <td className="text-center">
-                            {temp.bill[billConst.worker_salary] || "-"}
-                          </td>
-                          <td>
-                            <Link
-                              to={{
-                                pathname: `/fillData/bill`,
-                                state: {
-                                  month: String(temp.month),
-                                  year: String(temp.year),
-                                  electricity_bill: bill.electricity_bill,
-                                  worker_salary: bill.worker_salary,
-                                },
-                              }}
-                              className="link-dark text-center"
-                              onClick={() => setShouldRefresh(true)}
-                            >
-                              แก้ไข
-                            </Link>
-                          </td>
-                        </tr>
-                      </Fragment>
-                    );
-                  })}
+                  ))}
                   {billHistories.length === 0 && (
                     <tr style={{ height: "40px" }}></tr>
                   )}
