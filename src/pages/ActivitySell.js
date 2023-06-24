@@ -352,8 +352,7 @@ const ActivitySell = () => {
             activity_id={activity_id}
             activities={activities}
           />
-          {/* <form> */}
-          {/* FIXME 2 buttons in same form */}
+
           <form onSubmit={handleSubmit}>
             <div className="input">
               <table
@@ -393,7 +392,12 @@ const ActivitySell = () => {
                     <th>
                       <button
                         className="btn btn-danger btn-sm"
-                        onClick={addRowTable}
+                        onClick={(e) => {
+                          if (e.target === e.currentTarget) {
+                            e.preventDefault();
+                            addRowTable();
+                          }
+                        }}
                       >
                         Insert Row
                       </button>
@@ -401,7 +405,6 @@ const ActivitySell = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {/* FIXME should select size should be minimized  */}
                   <TableRows
                     rows={rows}
                     tableRowRemove={tableRowRemove}

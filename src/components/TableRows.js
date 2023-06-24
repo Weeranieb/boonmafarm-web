@@ -60,7 +60,12 @@ function TableRows({ rows, tableRowRemove, onValUpdate }) {
         <td>
           <button
             className="btn btn-dark btn-sm"
-            onClick={() => tableRowRemove(index)}
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                e.preventDefault();
+                tableRowRemove(index);
+              }
+            }}
           >
             Delete Row
           </button>
