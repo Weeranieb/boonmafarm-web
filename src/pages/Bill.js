@@ -1,29 +1,43 @@
-import { Fragment, useState } from "react";
+import { Fragment, useState, useEffect } from "react";
 import { Link, useLocation, useHistory } from "react-router-dom";
 import SearchDate from "../ui-components/SearchDate";
 import "./Bill.css";
 import { fetchData } from "../utils/fetch";
+import { billConst } from "../constants/bill";
+import { fullMonthThai } from "../utils/date";
 const Bill = () => {
   // state by location
   const history = useHistory();
   const location = useLocation();
-  const { month, year, worker_salary, electricity_bill } = location.state ?? {};
+  const { month, year, worker_salary, electricity_bill, bill_histories } =
+    location.state ?? {};
   console.log(
     "all state variables",
     month,
     year,
     worker_salary,
-    electricity_bill
+    electricity_bill,
+    bill_histories
   );
   const tempDate = new Date();
+  const [billHistories, setBillHistories] = useState(bill_histories || []);
+  const [shouldRefresh, setShouldRefresh] = useState(false);
   const [date, setDate] = useState({
     month: month || tempDate.getMonth() + 1,
     year: year || tempDate.getFullYear(),
   });
 
+  const [state, setState] = useState({
+    month: date.month,
+    year: date.year,
+    worker_salary: undefined,
+    electricity_bill: undefined,
+    bill_histories: [],
+  });
+
   const [bill, setBill] = useState({
-    worker_salary: { cost: worker_salary || 0, bill_id: -1 },
-    electricity_bill: { cost: electricity_bill || 0, bill_id: -2 },
+    worker_salary: worker_salary,
+    electricity_bill: electricity_bill,
   });
 
   const handleChange = (event) => {
@@ -36,11 +50,13 @@ const Bill = () => {
   };
 
   const handleChangeBill = (event) => {
-    let value = event.target.value;
-    let name = event.target.name;
+    const { value, name } = event.target;
     setBill((prevState) => ({
       ...prevState,
-      [name]: value,
+      [name]: {
+        ...prevState[name],
+        cost: value,
+      },
     }));
   };
 
@@ -60,15 +76,10 @@ const Bill = () => {
       headers: headers,
     };
 
-    const resetState = () => {
+    const resetState = (obj) => {
       history.push({
         pathname: "/fillData/bill",
-        state: {
-          month: date.month,
-          year: date.year,
-          worker_salary: bill.worker_salary,
-          electricity_bill: bill.electricity_bill,
-        },
+        state: state,
       });
     };
 
@@ -78,27 +89,156 @@ const Bill = () => {
     ).then((result) => {
       if (!result.error) {
         const obj = {};
-        console.log("result", result);
         for (const [billType, bill] of Object.entries(result)) {
           obj[billType] = {
             bill_id: bill.bill_id,
             cost: bill.cost,
           };
         }
-
-        console.log(obj);
         setBill(obj);
-        console.log("this is new bill", bill);
-        resetState();
-      } else {
-        resetState();
-        setBill({
-          worker_salary: { cost: worker_salary || 0, bill_id: -1 },
-          electricity_bill: { cost: electricity_bill || 0, bill_id: -2 },
-        });
+        console.log(obj);
+        setState((prevState) => ({
+          ...prevState,
+          worker_salary: obj?.worker_salary,
+          electricity_bill: obj?.electricity_bill,
+        }));
       }
     });
+
+    fetchData(
+      `${process.env.REACT_APP_BACKEND}/api/v1/master/getBillList`,
+      requestOptions
+    ).then((result) => {
+      if (!result.error) {
+        setBillHistories(result);
+        console.log("history", result);
+        setState((prevState) => ({
+          ...prevState,
+          bill_histories: result,
+        }));
+      }
+    });
+
+    console.log(state);
+    resetState();
+    setShouldRefresh(shouldRefresh);
   };
+
+  const handleSave = (event) => {
+    event.preventDefault();
+    const requestBody = {
+      bill: [],
+    };
+
+    let index = -1;
+    for (const [key, value] of Object.entries(bill)) {
+      const billType = billConst[key];
+      requestBody.bill.push({
+        bill_id: value.bill_id || index,
+        bill_type: billType,
+        cost: Number(value.cost),
+        date_issued: `${date.year}-${String(date.month).padStart(
+          2,
+          "0"
+        )}-01T00:00:00Z`,
+        record_status: "A",
+      });
+      if (!value.bill_id) {
+        index--;
+      }
+    }
+
+    const headers = new Headers();
+    headers.append("Content-Type", "application/json");
+
+    let requestOptions = {
+      body: JSON.stringify(requestBody),
+      method: "POST",
+      headers: headers,
+    };
+
+    fetch(
+      `${process.env.REACT_APP_BACKEND}/api/v1/master/saveBills`,
+      requestOptions
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.result) {
+          refreshStateAfterSave(data.result);
+        } else {
+          console.log(data.error);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
+    const refreshStateAfterSave = (keyBillIdByBillType) => {
+      // if it's new than new save
+      if (index === -(Object.keys(bill).length + 1)) {
+        const billDetail = [];
+        for (const [key, value] of Object.entries(bill)) {
+          billDetail.push({
+            bill_id: keyBillIdByBillType[billConst[key]],
+            bill_type: key,
+            cost: value.cost,
+          });
+        }
+        billHistories.unshift({
+          date: `${fullMonthThai[date.month - 1]} ${date.year + 543}`,
+          bill: billDetail,
+          month: date.month,
+          year: date.year,
+        });
+      }
+
+      history.push({
+        pathname: `/fillData/bill`,
+        state: {
+          month: date.month,
+          year: date.year,
+        },
+      });
+    };
+  };
+
+  useEffect(() => {
+    if (shouldRefresh) {
+      window.location.reload();
+    }
+    // Perform actions that depend on the updated state
+    const tempMonth = month;
+    const tempYear = year;
+    const headers = new Headers();
+    headers.append("Content-Type", "application/json");
+
+    const requestOptions = {
+      method: "GET",
+      headers: headers,
+    };
+
+    fetchData(
+      `${process.env.REACT_APP_BACKEND}/api/v1/master/getBillByDate?month=${tempMonth}&year=${tempYear}`,
+      requestOptions
+    ).then((result) => {
+      if (!result.error) {
+        const obj = {};
+        for (const [billType, bill] of Object.entries(result)) {
+          obj[billType] = {
+            bill_id: bill.bill_id,
+            cost: bill.cost,
+          };
+        }
+        setBill(obj);
+        console.log(obj);
+        setState((prevState) => ({
+          ...prevState,
+          worker_salary: obj?.worker_salary,
+          electricity_bill: obj?.electricity_bill,
+        }));
+      }
+    });
+  }, [month, year]);
 
   return (
     <div>
@@ -111,9 +251,8 @@ const Bill = () => {
               <div className="mb-4">
                 <span className="fs-3">กรอกค่าใช้จ่าย</span>
               </div>
-
-              <div>
-                <form action="#!">
+              <form onSubmit={handleSave}>
+                <div>
                   <label htmlFor="electricity_bill" className="me-3">
                     ค่าไฟ:
                   </label>
@@ -125,7 +264,7 @@ const Bill = () => {
                     className="form-control form-control-sm"
                     style={{ width: "100px" }}
                     onChange={handleChangeBill}
-                    value={bill.electricity_bill?.cost || 0}
+                    value={bill.electricity_bill?.cost || ""}
                   />
                   <br />
                   <br />
@@ -140,22 +279,22 @@ const Bill = () => {
                     className="form-control form-control-sm"
                     style={{ width: "100px" }}
                     onChange={handleChangeBill}
-                    value={bill.worker_salary?.cost || 0}
+                    value={bill.worker_salary?.cost || ""}
                   />
-                </form>
-              </div>
+                </div>
+                <button
+                  className="btn btn-primary btn-sm"
+                  style={{
+                    fontSize: "13px",
+                    position: "relative",
+                    top: "10px",
+                    left: "260px",
+                  }}
+                >
+                  บันทึก
+                </button>
+              </form>
             </div>
-            <button
-              className="btn btn-primary btn-sm"
-              style={{
-                fontSize: "13px",
-                position: "relative",
-                top: "10px",
-                left: "260px",
-              }}
-            >
-              บันทึก
-            </button>
           </div>
           <div className="col">
             <div className="text-end">
@@ -172,42 +311,45 @@ const Bill = () => {
               </div>
               <table className="table">
                 <thead className="text-center" style={{ fontSize: "17px" }}>
-                  <th>เดือน</th>
-                  <th>ค่าไฟ</th>
-                  <th>ค่าแรงลูกน้อง</th>
-                  <th></th>
+                  <tr>
+                    <th>เดือน</th>
+                    <th>ค่าไฟ</th>
+                    <th>ค่าแรงลูกน้อง</th>
+                    <th></th>
+                  </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td className="text-left">ธันวาคม 2565</td>
-                    <td className="text-center">85,589</td>
-                    <td className="text-center">86,000</td>
-                    <td className="text-center">แก้ไข</td>
-                  </tr>
-                  <tr>
-                    <td className="text-left">ธันวาคม 2565</td>
-                    <td className="text-center">85,589</td>
-                    <td className="text-center">86,000</td>
-                    <td className="text-center">แก้ไข</td>
-                  </tr>
-                  <tr>
-                    <td className="text-left">ธันวาคม 2565</td>
-                    <td className="text-center">85,589</td>
-                    <td className="text-center">86,000</td>
-                    <td className="text-center">แก้ไข</td>
-                  </tr>
-                  <tr>
-                    <td className="text-left">ธันวาคม 2565</td>
-                    <td className="text-center">85,589</td>
-                    <td className="text-center">86,000</td>
-                    <td className="text-center">แก้ไข</td>
-                  </tr>
-                  <tr>
-                    <td className="text-left">ธันวาคม 2565</td>
-                    <td className="text-center">85,589</td>
-                    <td className="text-center">86,000</td>
-                    <td className="text-center">แก้ไข</td>
-                  </tr>
+                  {billHistories.slice(0, 6).map((temp, index) => (
+                    <Fragment key={index}>
+                      <tr>
+                        <td className="text-left">{temp.date}</td>
+                        <td className="text-center">
+                          {temp.bill[billConst.electricity_bill] || "-"}
+                        </td>
+                        <td className="text-center">
+                          {temp.bill[billConst.worker_salary] || "-"}
+                        </td>
+                        <td>
+                          <Link
+                            to={{
+                              pathname: `/fillData/bill`,
+                              state: {
+                                month: temp.month - 1,
+                                year: temp.year,
+                              },
+                            }}
+                            className="link-dark text-center"
+                            // onClick={() => setShouldRefresh(true)}
+                          >
+                            แก้ไข
+                          </Link>
+                        </td>
+                      </tr>
+                    </Fragment>
+                  ))}
+                  {billHistories.length === 0 && (
+                    <tr style={{ height: "40px" }}></tr>
+                  )}
                 </tbody>
               </table>
             </div>

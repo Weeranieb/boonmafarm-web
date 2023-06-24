@@ -2,7 +2,6 @@ import "./General.css";
 
 const SearchDate = (props) => {
   const { month, year } = props.date;
-  console.log(month, year);
   return (
     <div>
       <label htmlFor="month" className="me-3">
