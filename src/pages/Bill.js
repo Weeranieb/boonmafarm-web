@@ -9,8 +9,16 @@ const Bill = () => {
   // state by location
   const history = useHistory();
   const location = useLocation();
-  const { month, year, bill_histories } = location.state || {};
-  console.log("all state variables", month, year, bill_histories);
+  const { month, year, electricity_bill, worker_salary, bill_histories } =
+    location.state || {};
+  console.log(
+    "all state variables",
+    month,
+    year,
+    electricity_bill,
+    worker_salary,
+    bill_histories
+  );
 
   const tempDate = new Date();
   const [billHistories, setBillHistories] = useState(bill_histories || []);
@@ -20,20 +28,19 @@ const Bill = () => {
     year: year || tempDate.getFullYear(),
   });
 
-  console.log(date, month, year);
-
   const [bill, setBill] = useState({
-    // worker_salary: worker_salary,
-    // electricity_bill: electricity_bill,
+    worker_salary: worker_salary,
+    electricity_bill: electricity_bill,
   });
 
   useEffect(() => {
     if (shouldRefresh) {
+      setShouldRefresh(false);
       window.location.reload();
     }
 
-    const tempMonth = date.month;
-    const tempYear = date.year;
+    // const tempMonth = date.month;
+    // const tempYear = date.year;
 
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
@@ -53,8 +60,34 @@ const Bill = () => {
       }
     });
 
+    // fetchData(
+    //   `${process.env.REACT_APP_BACKEND}/api/v1/master/getBillByDate?month=${tempMonth}&year=${tempYear}`,
+    //   requestOptions
+    // ).then((result) => {
+    //   if (!result.error) {
+    //     const obj = {};
+    //     for (const [billType, bill] of Object.entries(result)) {
+    //       obj[billType] = {
+    //         bill_id: bill.bill_id,
+    //         cost: bill.cost,
+    //       };
+    //     }
+    //     setBill(obj);
+    //   }
+    // });
+  }, [shouldRefresh]);
+
+  const fetchBillByDate = (month, year) => {
+    const headers = new Headers();
+    headers.append("Content-Type", "application/json");
+
+    const requestOptions = {
+      method: "GET",
+      headers: headers,
+    };
+
     fetchData(
-      `${process.env.REACT_APP_BACKEND}/api/v1/master/getBillByDate?month=${tempMonth}&year=${tempYear}`,
+      `${process.env.REACT_APP_BACKEND}/api/v1/master/getBillByDate?month=${date.month}&year=${date.year}`,
       requestOptions
     ).then((result) => {
       if (!result.error) {
@@ -66,10 +99,9 @@ const Bill = () => {
           };
         }
         setBill(obj);
-        console.log("bill", obj);
       }
     });
-  }, [date, shouldRefresh]);
+  };
 
   const handleChange = (event) => {
     let value = event.target.value;
@@ -94,40 +126,7 @@ const Bill = () => {
 
   const handleSearch = (event) => {
     event.preventDefault();
-
-    const headers = new Headers();
-    headers.append("Content-Type", "application/json");
-
-    const requestOptions = {
-      method: "GET",
-      headers: headers,
-    };
-
-    fetchData(
-      `${process.env.REACT_APP_BACKEND}/api/v1/master/getBillByDate?month=${date.month}&year=${date.year}`,
-      requestOptions
-    ).then((result) => {
-      if (!result.error) {
-        const obj = {};
-        for (const [billType, bill] of Object.entries(result)) {
-          obj[billType] = {
-            bill_id: bill.bill_id,
-            cost: bill.cost,
-          };
-        }
-        setBill(obj);
-        console.log(obj);
-      }
-    });
-    // fetchData(
-    //   `${process.env.REACT_APP_BACKEND}/api/v1/master/getBillList`,
-    //   requestOptions
-    // ).then((result) => {
-    //   if (!result.error) {
-    //     setBillHistories(result);
-    //     console.log("history", result);
-    //   }
-    // });
+    fetchBillByDate(date.month, date.year);
   };
 
   const handleSave = (event) => {
@@ -287,7 +286,7 @@ const Bill = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {billHistories.slice(0, 5).map((temp, index) => (
+                  {/* {billHistories.slice(0, 5).map((temp, index) => (
                     <Fragment key={index}>
                       <tr>
                         <td className="text-left">{temp.date}</td>
@@ -314,7 +313,41 @@ const Bill = () => {
                         </td>
                       </tr>
                     </Fragment>
-                  ))}
+                  ))} */}
+                  {billHistories.slice(0, 5).map((temp, index) => {
+                    fetchBillByDate(temp.month, temp.year);
+
+                    return (
+                      <Fragment key={index}>
+                        <tr>
+                          <td className="text-left">{temp.date}</td>
+                          <td className="text-center">
+                            {temp.bill[billConst.electricity_bill] || "-"}
+                          </td>
+                          <td className="text-center">
+                            {temp.bill[billConst.worker_salary] || "-"}
+                          </td>
+                          <td>
+                            <Link
+                              to={{
+                                pathname: `/fillData/bill`,
+                                state: {
+                                  month: String(temp.month),
+                                  year: String(temp.year),
+                                  electricity_bill: bill.electricity_bill,
+                                  worker_salary: bill.worker_salary,
+                                },
+                              }}
+                              className="link-dark text-center"
+                              onClick={() => setShouldRefresh(true)}
+                            >
+                              แก้ไข
+                            </Link>
+                          </td>
+                        </tr>
+                      </Fragment>
+                    );
+                  })}
                   {billHistories.length === 0 && (
                     <tr style={{ height: "40px" }}></tr>
                   )}
