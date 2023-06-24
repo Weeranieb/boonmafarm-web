@@ -11,18 +11,9 @@ const Bill = () => {
   const location = useLocation();
   const { month, year, electricity_bill, worker_salary, bill_histories } =
     location.state || {};
-  console.log(
-    "all state variables",
-    month,
-    year,
-    electricity_bill,
-    worker_salary,
-    bill_histories
-  );
 
   const tempDate = new Date();
   const [billHistories, setBillHistories] = useState(bill_histories || []);
-  const [shouldRefresh, setShouldRefresh] = useState(false);
   const [date, setDate] = useState({
     month: month || tempDate.getMonth() + 1,
     year: year || tempDate.getFullYear(),
@@ -34,11 +25,6 @@ const Bill = () => {
   });
 
   useEffect(() => {
-    if (shouldRefresh) {
-      setShouldRefresh(false);
-      window.location.reload();
-    }
-
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
 
@@ -53,26 +39,9 @@ const Bill = () => {
     ).then((result) => {
       if (!result.error) {
         setBillHistories(result);
-        console.log("bill history", result);
       }
     });
-
-    // fetchData(
-    //   `${process.env.REACT_APP_BACKEND}/api/v1/master/getBillByDate?month=${tempMonth}&year=${tempYear}`,
-    //   requestOptions
-    // ).then((result) => {
-    //   if (!result.error) {
-    //     const obj = {};
-    //     for (const [billType, bill] of Object.entries(result)) {
-    //       obj[billType] = {
-    //         bill_id: bill.bill_id,
-    //         cost: bill.cost,
-    //       };
-    //     }
-    //     setBill(obj);
-    //   }
-    // });
-  }, [shouldRefresh]);
+  }, [setBillHistories]);
 
   const fetchBillByDate = (iMonth, iYear) => {
     const headers = new Headers();
@@ -103,7 +72,6 @@ const Bill = () => {
   const handleChange = (event) => {
     let value = event.target.value;
     let name = event.target.name;
-    console.log("name value", name, value);
     setDate((prevState) => ({
       ...prevState,
       [name]: value,
@@ -178,20 +146,43 @@ const Bill = () => {
     const refreshStateAfterSave = (keyBillIdByBillType) => {
       // if it's new than new save
       if (index === -(Object.keys(bill).length + 1)) {
-        const billDetail = [];
-        for (const [key, value] of Object.entries(bill)) {
-          billDetail.push({
-            bill_id: keyBillIdByBillType[billConst[key]],
-            bill_type: key,
-            cost: value.cost,
-          });
+        const billDetail = {};
+        for (const [key, value] of Object.entries(keyBillIdByBillType)) {
+          billDetail[key] = Number(bill[billConst[key]].cost);
+          setBill((prevState) => ({
+            ...prevState,
+            [billConst[key]]: {
+              ...prevState[billConst[key]],
+              bill_id: value,
+            },
+          }));
         }
         billHistories.unshift({
-          date: `${fullMonthThai[date.month - 1]} ${date.year + 543}`,
+          date: `${fullMonthThai[Number(date.month) - 1]} ${
+            Number(date.year) + 543
+          }`,
           bill: billDetail,
           month: date.month,
           year: date.year,
         });
+      } else {
+        const data = [...billHistories];
+        let index = 0;
+        for (const [i, tempBillHis] of data.entries()) {
+          if (
+            tempBillHis.month === Number(date.month) &&
+            tempBillHis.year === Number(date.year)
+          ) {
+            index = i;
+            break;
+          }
+        }
+
+        const tempObj = {};
+        for (const key of Object.keys(keyBillIdByBillType)) {
+          tempObj[key] = Number(bill[billConst[key]].cost);
+        }
+        data[index].bill = tempObj;
       }
 
       history.push({
