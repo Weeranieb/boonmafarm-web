@@ -15,7 +15,14 @@ const ActivitySell = () => {
   const location = useLocation();
   const { farm, pond_id, pond_name, active_pond_id, activity_id, activities } =
     location.state ?? {};
-
+  console.log(
+    farm,
+    pond_id,
+    pond_name,
+    active_pond_id,
+    activity_id,
+    activities
+  );
   //set state
   const [newSellDetailId, setNewSellDetailId] = useState(-1);
   const [rows, initRow] = useState([]);
@@ -124,6 +131,8 @@ const ActivitySell = () => {
       sell_detail: [],
       sum_profit: 0,
     });
+
+    initRow([]);
 
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
@@ -261,7 +270,7 @@ const ActivitySell = () => {
       // if it's new than new save
       if (sellId < 0)
         pondActivities.unshift({
-          activity_id: sellHistory.sell_id,
+          activity_id: sellHistory.history.sell_id,
           activity_type: "sell",
           date: changeTimeUTCToThaiDate(sellHistory.history.date_issued),
           detail: `ขายปลา บ่อ ${pond_name}`,
@@ -273,7 +282,7 @@ const ActivitySell = () => {
           pond_id: selectFarm.pondId,
           pond_name: selectFarm.pondName,
           active_pond_id: sellHistory.history.active_pond_id,
-          activity_id: sellHistory.history.fill_in_id,
+          activity_id: sellHistory.history.sell_id,
           activities: pondActivities,
         },
       });
@@ -481,6 +490,7 @@ const ActivitySell = () => {
                 </tr>
               </thead>
               <tbody className="text-center">
+                {console.log("pond_activities", pondActivities)}
                 {pondActivities.slice(0, 6).map((activity, index) => (
                   <Fragment key={index}>
                     <tr>
