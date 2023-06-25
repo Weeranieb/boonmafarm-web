@@ -9,6 +9,7 @@ import SelectActivity from "../ui-components/SelectActivity";
 import { pondNameMapId, rowDailyFeeds } from "../utils/pond";
 import { activityDictionaryMap } from "../utils/activity";
 import { changeTimeUTCToThaiDate } from "../utils/date";
+import { merchantNameById } from "../constants/merchant";
 
 const ActivitySell = () => {
   const history = useHistory();
@@ -41,6 +42,8 @@ const ActivitySell = () => {
     sell_id: activity_id ?? -1,
     date_issued: "",
     sum_profit: 0,
+    additional_cost: 0,
+    merchant_id: 1,
   });
 
   //? use Effect
@@ -229,8 +232,8 @@ const ActivitySell = () => {
       sell_history: {
         sell_id: sellId,
         active_pond_id: tempActivePondId,
-        merchant_id: 1,
-        additional_cost: 10000,
+        merchant_id: Number(sellData.merchant_id),
+        additional_cost: Number(sellData.additional_cost),
         date_issued: `${sellData.date_issued}T00:00:00Z`,
         record_status: "A",
       },
@@ -363,14 +366,14 @@ const ActivitySell = () => {
           />
 
           <form onSubmit={handleSubmit}>
-            <div className="input">
+            <div className="">
               <table
                 className="text-center table table-borderless"
                 width="100%"
               >
                 <tbody>
                   <tr>
-                    <td className="text-end pe-4">
+                    <td className="text-end pe-1 pt-2">
                       <label htmlFor="date">วันที่ลงปลา:</label>
                     </td>
                     <td className="text-start">
@@ -379,16 +382,48 @@ const ActivitySell = () => {
                         name="date_issued"
                         id="date_issued"
                         className="form-control form-control-sm"
-                        style={{ width: "185px" }}
+                        style={{ width: "125px" }}
                         value={sellData.date_issued}
                         onChange={handleChange}
                       />
+                    </td>
+                    <td className="text-end  pt-2">
+                      <label htmlFor="date">ค่าใช้จ่าย:</label>
+                    </td>
+                    <td className="text-start">
+                      <input
+                        type="text"
+                        name="additional_cost"
+                        id="additional_cost"
+                        className="form-control form-control-sm"
+                        style={{ width: "80px" }}
+                        value={sellData.additional_cost}
+                        onChange={handleChange}
+                      />
+                    </td>
+                    <td className="text-end  pt-2">
+                      <label htmlFor="date">คนซื้อ:</label>
+                    </td>
+                    <td className="text-start">
+                      <select
+                        name="merchant_id"
+                        id="merchant_id"
+                        className="form-select form-select-sm"
+                        style={{ width: "80px" }}
+                        onChange={handleChange}
+                        value={sellData.merchant_id}
+                      >
+                        {Object.entries(merchantNameById).map(([id, name]) => (
+                          <option key={id} value={id}>
+                            {name}
+                          </option>
+                        ))}
+                      </select>
                     </td>
                   </tr>
                 </tbody>
               </table>
             </div>
-            {/* new table */}
             <div>
               <table className="table table-borderless">
                 <thead>
