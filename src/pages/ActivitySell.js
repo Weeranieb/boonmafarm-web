@@ -84,7 +84,7 @@ const ActivitySell = () => {
             const initProfit = result.detail.reduce(
               (accumulator, sell) =>
                 accumulator + sell.total_amount * sell.price_per_kilo,
-              0
+              -Number(result.history.additional_cost)
             );
             result.history.sum_profit = initProfit;
             setSellData(result.history);
@@ -315,7 +315,7 @@ const ActivitySell = () => {
         return accumulator + sell.total;
       }
       return accumulator;
-    }, 0);
+    }, -Number(sellData.additional_cost));
 
     setSellData((prevState) => ({
       ...prevState,
@@ -339,7 +339,7 @@ const ActivitySell = () => {
           return accumulator + sell.total;
         }
         return accumulator;
-      }, 0);
+      }, -Number(sellData.additional_cost));
 
       setSellData((prevState) => ({
         ...prevState,
