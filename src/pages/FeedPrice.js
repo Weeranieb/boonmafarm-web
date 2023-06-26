@@ -1,3 +1,4 @@
+import { feedTypeConst, unitMap } from "../constants/feed_type";
 import SearchFeedType from "../ui-components/SearchFeedType";
 import "./FeedPrice.css";
 import "./General.css";
@@ -17,31 +18,39 @@ const FeedPrice = () => {
             </form>
           </div>
           <div className="edit-header mb-4">เพิ่ม/แก้ไขราคาเหยื่อ</div>
-          <div className="input">
-            <form action="#!" id="feed_price"></form>
-            <table className="text-center table table-borderless" width="100%">
-              <tbody>
-                <tr>
-                  <td className="text-end pe-4" style={{ width: "30%" }}>
-                    ประเภทเหยื่อ:
-                  </td>
-                  <td className="text-start">
-                    <select
-                      name="feed_type"
-                      id="feed_type"
-                      form="feed_price"
-                      aria-label="Disabled select example"
-                      disabled
-                      className="form-select form-select-sm"
-                      style={{ width: "95px" }}
-                      defaultValue="fish"
-                    >
-                      <option value="fish">เหยื่อสด</option>
-                      <option value="pro_feed">โปรฟีด</option>
-                    </select>
-                  </td>
-                </tr>
-                <tr>
+          <form>
+            <div className="input">
+              <table
+                className="text-center table table-borderless"
+                width="100%"
+              >
+                <tbody>
+                  <tr>
+                    <td className="text-end pe-4" style={{ width: "30%" }}>
+                      ประเภทเหยื่อ:
+                    </td>
+                    <td className="text-start">
+                      <select
+                        name="feed_type"
+                        id="feed_type"
+                        form="feed_price"
+                        aria-label="Disabled select example"
+                        disabled
+                        className="form-select form-select-sm"
+                        style={{ width: "95px" }}
+                        defaultValue="fish"
+                      >
+                        {Object.entries(feedTypeConst).map(
+                          ([name_id, name]) => (
+                            <option key={name_id} value={name_id}>
+                              {name}
+                            </option>
+                          )
+                        )}
+                      </select>
+                    </td>
+                  </tr>
+                  {/* <tr>
                   <td className="text-end pe-4" style={{ width: "30%" }}>
                     คนขายเหยื่อ:
                   </td>
@@ -57,80 +66,78 @@ const FeedPrice = () => {
                       defaultValue="sa"
                     >
                       <option value="sa">สา</option>
-                      <option value="nong">น้อง</option>
+                      <option value="nong">น้อง</option>x
                       <option value="pu">ปุ๊</option>
                     </select>
                   </td>
-                </tr>
-                <tr>
-                  <td className="text-end pe-4">
-                    <label htmlFor="date">วันที่ขึ้นราคา:</label>
-                  </td>
-                  <td className="text-start">
-                    <input
-                      type="date"
-                      name="date"
-                      id="date"
-                      form="feed_price"
-                      className="form-control form-control-sm"
-                      style={{ width: "185px" }}
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td className="text-end pe-4">
-                    <label htmlFor="price">ราคา:</label>
-                  </td>
-                  <td className="text-start">
-                    <input
-                      type="text"
-                      name="price"
-                      inputMode="numeric"
-                      id="price"
-                      form="feed_price"
-                      className="form-control form-control-sm"
-                      style={{ width: "185px" }}
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td className="text-end pe-4" style={{ width: "30%" }}>
-                    หน่วย:
-                  </td>
-                  <td className="text-start">
-                    <select
-                      name="unit"
-                      id="unit"
-                      form="feed_price"
-                      aria-label="Disabled select example"
-                      disabled
-                      className="form-select form-select-sm"
-                      style={{ width: "120px" }}
-                      defaultValue="Baht per box"
-                    >
-                      <option value="Baht per box">บาทต่อกิโล</option>
-                      <option value="Baht per kilo">บาทต่อกิโล</option>
-                      <option value="Baht per bag">บาทต่อถุง</option>
-                    </select>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div style={{ height: "40px" }}></div>
-          <button className="btn btn-primary btn-sm">Save</button>
-          <Link
-            to="/fillData/feed-price"
-            className="btn btn-warning ms-1 btn-sm"
-          >
-            Cancel
-          </Link>
-          <Link
-            to="/fillData/feed-price"
-            className="btn btn-danger ms-1 btn-sm"
-          >
-            Delete
-          </Link>
+                </tr> */}
+                  <tr>
+                    <td className="text-end pe-4">
+                      <label htmlFor="date">วันที่ขึ้นราคา:</label>
+                    </td>
+                    <td className="text-start">
+                      <input
+                        type="date"
+                        name="date_issued"
+                        id="date_issued"
+                        className="form-control form-control-sm"
+                        style={{ width: "185px" }}
+                      />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="text-end pe-4">
+                      <label htmlFor="price">ราคา:</label>
+                    </td>
+                    <td className="text-start">
+                      <input
+                        type="text"
+                        name="price_per_unit"
+                        inputMode="numeric"
+                        id="price_per_unit"
+                        className="form-control form-control-sm"
+                        style={{ width: "185px" }}
+                      />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="text-end pe-4" style={{ width: "30%" }}>
+                      หน่วย:
+                    </td>
+                    <td className="text-start">
+                      <select
+                        name="feed_unit"
+                        id="feed_unit"
+                        className="form-select form-select-sm"
+                        style={{ width: "120px" }}
+                        defaultValue="baht per box"
+                      >
+                        {[...unitMap.entries()].map(([name_id, name]) => (
+                          <option key={name_id} value={name_id}>
+                            {name}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div style={{ height: "40px" }}></div>
+            <button className="btn btn-primary btn-sm">Save</button>
+            <Link
+              to="/fillData/feed-price"
+              className="btn btn-warning ms-1 btn-sm"
+            >
+              Cancel
+            </Link>
+            <Link
+              to="/fillData/feed-price"
+              className="btn btn-danger ms-1 btn-sm"
+            >
+              Delete
+            </Link>
+          </form>
         </div>
 
         <div className="col">

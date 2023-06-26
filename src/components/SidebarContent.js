@@ -26,9 +26,9 @@ const SidebarContent = () => {
           <MenuItem routerLink={<Link to="/fillData/fill" />}>
             ลง-ย้าย-ขาย
           </MenuItem>
-          <MenuItem routerLink={<Link to="/fillData/feed-in" />}>
+          {/* <MenuItem routerLink={<Link to="/fillData/feed-in" />}>
             เหยื่อเข้า
-          </MenuItem>
+          </MenuItem> */}
           <MenuItem routerLink={<Link to="/fillData/daily-feed" />}>
             เหยื่อรายวัน
           </MenuItem>

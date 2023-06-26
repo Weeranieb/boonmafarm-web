@@ -1,3 +1,5 @@
+import { feedTypeConst } from "../constants/feed_type";
+
 const SearchFeedType = () => {
   return (
     <div style={{ fontSize: "15px" }}>
@@ -11,22 +13,11 @@ const SearchFeedType = () => {
         style={{ width: "100px" }}
         defaultValue="fish"
       >
-        <option value="fish">เหยื่อสด</option>
-        <option value="pro_feed">โปรฟีด</option>
-      </select>
-      <label htmlFor="vendor" className="ms-4 me-3">
-        คนขายเหยื่อ
-      </label>
-      <select
-        name="vendor"
-        id="vendor"
-        className="form-select form-select-sm"
-        style={{ width: "70px" }}
-        defaultValue="sa"
-      >
-        <option value="sa">สา</option>
-        <option value="pu">ปุ๊</option>
-        <option value="nong">น้อง</option>
+        {Object.entries(feedTypeConst).map(([name_id, name]) => (
+          <option key={name_id} value={name_id}>
+            {name}
+          </option>
+        ))}
       </select>
       <button
         className="ms-4 btn btn-primary btn-sm"
