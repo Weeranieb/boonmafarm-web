@@ -1,6 +1,7 @@
 import { feedTypeConst } from "../constants/feed_type";
 
-const SearchFeedType = () => {
+const SearchFeedType = (props) => {
+  const { onChange, feed_type } = props;
   return (
     <div style={{ fontSize: "15px" }}>
       <label htmlFor="feed_type" className="me-3">
@@ -11,6 +12,8 @@ const SearchFeedType = () => {
         id="feed_type"
         className="form-select form-select-sm"
         style={{ width: "100px" }}
+        value={feed_type}
+        onChange={onChange}
         defaultValue="fish"
       >
         {Object.entries(feedTypeConst).map(([name_id, name]) => (

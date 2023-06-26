@@ -284,7 +284,7 @@ const Bill = () => {
                         <td className="text-center">
                           {temp.bill[billConst.worker_salary] || "-"}
                         </td>
-                        <td>
+                        <td className="text-center">
                           <Link
                             to={{
                               pathname: `/fillData/bill`,
@@ -295,7 +295,7 @@ const Bill = () => {
                                 worker_salary: bill.worker_salary,
                               },
                             }}
-                            className="link-dark text-center"
+                            className="link-dark"
                             onClick={() => {
                               fetchBillByDate(temp.month, temp.year);
                               setDate({

@@ -1,10 +1,91 @@
+import { Fragment, useState, useEffect } from "react";
 import { feedTypeConst, unitMap } from "../constants/feed_type";
+import { Link, useLocation, useHistory } from "react-router-dom";
 import SearchFeedType from "../ui-components/SearchFeedType";
 import "./FeedPrice.css";
 import "./General.css";
-import { Link } from "react-router-dom";
+import { fetchData } from "../utils/fetch";
 
 const FeedPrice = () => {
+  // state by location
+  const history = useHistory();
+  const location = useLocation();
+  const { feed_price_data, feed_price_histories } = location.state || {};
+
+  const [feedPriceHistories, setFeedPriceHistories] = useState(
+    feed_price_histories || []
+  );
+  const [feedPriceData, setFeedPriceData] = useState(
+    feed_price_data || {
+      feed_type: "fish",
+      date_issued: "",
+      price_per_unit: "",
+      feed_unit: "baht per box",
+    }
+  );
+  // const [feedType, setFeedType] = useState(feed_type || "fish");
+
+  useEffect(() => {
+    const headers = new Headers();
+    headers.append("Content-Type", "application/json");
+
+    const requestOptions = {
+      method: "GET",
+      headers: headers,
+    };
+
+    fetchData(
+      `${process.env.REACT_APP_BACKEND}/api/v1/feed/getFeedPriceLists`,
+      requestOptions
+    ).then((result) => {
+      if (!result.error) {
+        setFeedPriceHistories(result);
+      }
+    });
+  }, [setFeedPriceHistories]);
+
+  // const handleChangeFeedType = (event) => {
+  //   let { value } = event.target;
+  //   setFeedType(value);
+  //   console.log(feedType);
+  // };
+
+  const handleChangePrice = (event) => {
+    let { name, value } = event.target;
+    console.log(name, value);
+    setFeedPriceData((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+
+  const fetchFeedPriceById = (feedPriceId) => {
+    console.log("feed id", feedPriceId);
+    const headers = new Headers();
+    headers.append("Content-Type", "application/json");
+
+    const requestOptions = {
+      method: "GET",
+      headers: headers,
+    };
+
+    fetchData(
+      `${process.env.REACT_APP_BACKEND}/api/v1/feed/getFeedPrice?feed_price_id=${feedPriceId}`,
+      requestOptions
+    ).then((result) => {
+      if (!result.error) {
+        result.date_issued = result.date_issued.substring(0, 10);
+        console.log("result", result);
+        setFeedPriceData(result);
+      }
+    });
+  };
+
+  const handleSave = (event) => {
+    event.preventDefault();
+    console.log("this is data", feedPriceData);
+  };
+
   return (
     <div>
       <div className="header">ราคาเหยื่อ</div>
@@ -12,13 +93,13 @@ const FeedPrice = () => {
 
       <div className="row">
         <div className="col-6">
-          <div className="text-start select-date ms-4 mb-4">
-            <form action="#!">
+          {/* <div className="text-start select-date ms-4 mb-4">
+            <form onChange={handleChangeFeedType} feed_type={feedType}>
               <SearchFeedType />
             </form>
-          </div>
+          </div> */}
           <div className="edit-header mb-4">เพิ่ม/แก้ไขราคาเหยื่อ</div>
-          <form>
+          <form onSubmit={handleSave}>
             <div className="input">
               <table
                 className="text-center table table-borderless"
@@ -33,12 +114,12 @@ const FeedPrice = () => {
                       <select
                         name="feed_type"
                         id="feed_type"
-                        form="feed_price"
-                        aria-label="Disabled select example"
-                        disabled
+                        // aria-label="Disabled select example"
+                        // disabled
                         className="form-select form-select-sm"
                         style={{ width: "95px" }}
-                        defaultValue="fish"
+                        value={feedPriceData.feed_type || "fish"}
+                        onChange={handleChangePrice}
                       >
                         {Object.entries(feedTypeConst).map(
                           ([name_id, name]) => (
@@ -82,6 +163,8 @@ const FeedPrice = () => {
                         id="date_issued"
                         className="form-control form-control-sm"
                         style={{ width: "185px" }}
+                        value={feedPriceData.date_issued || ""}
+                        onChange={handleChangePrice}
                       />
                     </td>
                   </tr>
@@ -97,6 +180,8 @@ const FeedPrice = () => {
                         id="price_per_unit"
                         className="form-control form-control-sm"
                         style={{ width: "185px" }}
+                        onChange={handleChangePrice}
+                        value={feedPriceData.price_per_unit || ""}
                       />
                     </td>
                   </tr>
@@ -110,7 +195,8 @@ const FeedPrice = () => {
                         id="feed_unit"
                         className="form-select form-select-sm"
                         style={{ width: "120px" }}
-                        defaultValue="baht per box"
+                        value={feedPriceData.feed_unit || "baht per box"}
+                        onChange={handleChangePrice}
                       >
                         {[...unitMap.entries()].map(([name_id, name]) => (
                           <option key={name_id} value={name_id}>
@@ -150,48 +236,42 @@ const FeedPrice = () => {
               <thead className="text-center" style={{ fontSize: "17px" }}>
                 <tr>
                   <th style={{ width: "46%" }}>วันที่</th>
-                  <th style={{ width: "18%" }}>จำนวน</th>
+                  <th style={{ width: "18%" }}>ราคา</th>
                   <th style={{ width: "18%" }}>หน่วย</th>
                   <th style={{ width: "18%" }}></th>
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td className="text-left ps-3">17 ธ.ค. 2565 - ปัจจุบัน</td>
-                  <td className="text-center">121</td>
-                  <td className="text-center">บาท/โล</td>
-                  <td className="text-center">แก้ไข</td>
-                </tr>
-                <tr>
-                  <td className="text-left ps-3">15 - ก.ค. - 16 ธ.ค. 2565</td>
-                  <td className="text-center">121</td>
-                  <td className="text-center">บาท/โล</td>
-                  <td className="text-center">แก้ไข</td>
-                </tr>
-                <tr>
-                  <td className="text-left ps-3">
-                    24 พ.ค. 2565 - 09 มิ.ย. 2565{" "}
-                  </td>
-                  <td className="text-center">121</td>
-                  <td className="text-center">บาท/โล</td>
-                  <td className="text-center">แก้ไข</td>
-                </tr>
-                <tr>
-                  <td className="text-left ps-3">
-                    12 พ.ค. 2565 - 24 พ.ค. 2565
-                  </td>
-                  <td className="text-center">121</td>
-                  <td className="text-center">บาท/โล</td>
-                  <td className="text-center">แก้ไข</td>
-                </tr>
-                <tr>
-                  <td className="text-left ps-3">
-                    01 พ.ค. 2565 - 12 พ.ค. 2565
-                  </td>
-                  <td className="text-center">121</td>
-                  <td className="text-center">บาท/โล</td>
-                  <td className="text-center">แก้ไข</td>
-                </tr>
+                {feedPriceHistories.slice(0, 5).map((temp, index) => (
+                  <Fragment key={index}>
+                    <tr>
+                      <td className="text-left ps-3">{temp.date}</td>
+                      <td className="text-center">{temp.price_per_unit}</td>
+                      <td className="text-center">
+                        {unitMap.get(temp.feed_unit)}
+                      </td>
+                      <td className=" text-center">
+                        <Link
+                          to={{
+                            pathname: `/fillData/feed-price`,
+                            state: {
+                              feed_price_data: feedPriceData,
+                            },
+                          }}
+                          className="link-dark"
+                          onClick={() => {
+                            fetchFeedPriceById(temp.feed_price_id);
+                          }}
+                        >
+                          แก้ไข
+                        </Link>
+                      </td>
+                    </tr>
+                  </Fragment>
+                ))}
+                {feedPriceHistories.length === 0 && (
+                  <tr style={{ height: "40px" }}></tr>
+                )}
               </tbody>
             </table>
           </div>
