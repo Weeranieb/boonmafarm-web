@@ -7,11 +7,12 @@ import "./General.css";
 import { fetchData } from "../utils/fetch";
 
 const FeedPrice = () => {
-  // state by location
-  const history = useHistory();
   const location = useLocation();
+  const history = useHistory();
   const { feed_price_data, feed_price_histories } = location.state || {};
-
+  console.log(feed_price_data, feed_price_histories);
+  const [shouldRefresh, setShouldRefresh] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
   const [feedPriceHistories, setFeedPriceHistories] = useState(
     feed_price_histories || []
   );
@@ -23,9 +24,12 @@ const FeedPrice = () => {
       feed_unit: "baht per box",
     }
   );
-  // const [feedType, setFeedType] = useState(feed_type || "fish");
 
   useEffect(() => {
+    if (shouldRefresh) {
+      window.location.reload();
+    }
+
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
 
@@ -42,49 +46,58 @@ const FeedPrice = () => {
         setFeedPriceHistories(result);
       }
     });
-  }, [setFeedPriceHistories]);
-
-  // const handleChangeFeedType = (event) => {
-  //   let { value } = event.target;
-  //   setFeedType(value);
-  //   console.log(feedType);
-  // };
+  }, [shouldRefresh]);
 
   const handleChangePrice = (event) => {
-    let { name, value } = event.target;
-    console.log(name, value);
+    setIsTyping(true);
+    const { name, value } = event.target;
     setFeedPriceData((prevState) => ({
       ...prevState,
       [name]: value,
     }));
   };
 
-  const fetchFeedPriceById = (feedPriceId) => {
-    console.log("feed id", feedPriceId);
-    const headers = new Headers();
-    headers.append("Content-Type", "application/json");
+  const fetchFeedPriceById = async (feedPriceId, callback) => {
+    try {
+      const headers = new Headers();
+      headers.append("Content-Type", "application/json");
 
-    const requestOptions = {
-      method: "GET",
-      headers: headers,
-    };
+      const requestOptions = {
+        method: "GET",
+        headers: headers,
+      };
 
-    fetchData(
-      `${process.env.REACT_APP_BACKEND}/api/v1/feed/getFeedPrice?feed_price_id=${feedPriceId}`,
-      requestOptions
-    ).then((result) => {
-      if (!result.error) {
+      const response = await fetchData(
+        `${process.env.REACT_APP_BACKEND}/api/v1/feed/getFeedPrice?feed_price_id=${feedPriceId}`,
+        requestOptions
+      );
+
+      if (!response.error) {
+        const result = response;
         result.date_issued = result.date_issued.substring(0, 10);
-        console.log("result", result);
-        setFeedPriceData(result);
+        callback(result);
       }
-    });
+    } catch (error) {
+      console.error("Error fetching feed price:", error);
+    }
   };
 
   const handleSave = (event) => {
     event.preventDefault();
+    setIsTyping(false);
     console.log("this is data", feedPriceData);
   };
+
+  useEffect(() => {
+    if (!isTyping && feedPriceData !== null) {
+      history.push({
+        pathname: "/fillData/feed-price",
+        state: {
+          feed_price_data: feedPriceData,
+        },
+      });
+    }
+  }, [feedPriceData, history, isTyping]);
 
   return (
     <div>
@@ -210,18 +223,24 @@ const FeedPrice = () => {
               </table>
             </div>
             <div style={{ height: "40px" }}></div>
-            <button className="btn btn-primary btn-sm">Save</button>
+            <button className="btn btn-primary btn-sm">บันทึก</button>
             <Link
-              to="/fillData/feed-price"
+              to={{
+                pathname: `/fillData/feed-price`,
+                state: {
+                  feed_price_data: feed_price_data,
+                },
+              }}
               className="btn btn-warning ms-1 btn-sm"
+              onClick={() => setShouldRefresh(true)}
             >
-              Cancel
+              ยกเลิก
             </Link>
             <Link
               to="/fillData/feed-price"
               className="btn btn-danger ms-1 btn-sm"
             >
-              Delete
+              ลบ
             </Link>
           </form>
         </div>
@@ -260,7 +279,10 @@ const FeedPrice = () => {
                           }}
                           className="link-dark"
                           onClick={() => {
-                            fetchFeedPriceById(temp.feed_price_id);
+                            fetchFeedPriceById(
+                              temp.feed_price_id,
+                              setFeedPriceData
+                            );
                           }}
                         >
                           แก้ไข
