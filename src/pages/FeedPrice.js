@@ -1,7 +1,6 @@
 import { Fragment, useState, useEffect } from "react";
 import { feedTypeConst, unitMap } from "../constants/feed_type";
 import { Link, useLocation, useHistory } from "react-router-dom";
-import SearchFeedType from "../ui-components/SearchFeedType";
 import "./FeedPrice.css";
 import "./General.css";
 import { fetchData } from "../utils/fetch";
@@ -86,6 +85,76 @@ const FeedPrice = () => {
     event.preventDefault();
     setIsTyping(false);
     console.log("this is data", feedPriceData);
+    const requestBody = {
+      feed_type: feedPriceData.feed_type,
+      feed_price: [
+        {
+          feed_price_id: feedPriceData.feed_price_id || -1,
+          feed_type: feedPriceData.feed_type || "",
+          price_per_unit: Number(feedPriceData.price_per_unit) || 0,
+          feed_unit: feedPriceData.feed_unit || "",
+          date_issued: `${feedPriceData.date_issued}T00:00:00Z`,
+          record_status: "A",
+        },
+      ],
+    };
+
+    console.log("req Body", requestBody);
+    // request POST
+    const headers = new Headers();
+    headers.append("Content-Type", "application/json");
+
+    let requestOptions = {
+      body: JSON.stringify(requestBody),
+      method: "POST",
+      headers: headers,
+    };
+
+    // fetch
+    fetch(
+      `${process.env.REACT_APP_BACKEND}/api/v1/feed/saveFeedPrices`,
+      requestOptions
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.result) {
+          console.log("result after save", data.result);
+          refreshStateAfterSave(data.result);
+        } else {
+          console.log(data.error);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
+    const feedPriceId = feedPriceData.feed_price_id || -1;
+    const refreshStateAfterSave = (feedPrice) => {
+      console.log("feed id", feedPrice[feedPriceId]);
+      // if it's new than new save
+      // if (feedPriceId < 0)
+
+      //   feedPriceHistories.unshift({
+      //     date:
+      //     feed_price_id: feedPrice.feed_price_id,
+      //     feed_type:
+      //     feed_unit:
+      //     price_per_unit
+      //   });
+      setShouldRefresh(true);
+      history.push({
+        pathname: "/fillData/feed-price",
+        state: {
+          feed_price_data: {
+            feed_type: feedPriceData.feed_type,
+            date_issued: feedPriceData.date_issued,
+            price_per_unit: feedPriceData.price_per_unit,
+            feed_unit: feedPriceData.feed_unit,
+            feed_price_id: feedPrice[feedPriceId],
+          },
+        },
+      });
+    };
   };
 
   useEffect(() => {
@@ -238,7 +307,7 @@ const FeedPrice = () => {
             </Link>
             <Link
               to="/fillData/feed-price"
-              className="btn btn-danger ms-1 btn-sm"
+              className="btn btn-danger ms-1 btn-sm ps-3 pe-3"
             >
               ลบ
             </Link>
