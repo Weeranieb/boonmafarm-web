@@ -9,7 +9,6 @@ const FeedPrice = () => {
   const location = useLocation();
   const history = useHistory();
   const { feed_price_data, feed_price_histories } = location.state || {};
-  console.log(feed_price_data, feed_price_histories);
   const [shouldRefresh, setShouldRefresh] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [feedPriceHistories, setFeedPriceHistories] = useState(
@@ -84,7 +83,6 @@ const FeedPrice = () => {
   const handleSave = (event) => {
     event.preventDefault();
     setIsTyping(false);
-    console.log("this is data", feedPriceData);
     const requestBody = {
       feed_type: feedPriceData.feed_type,
       feed_price: [
@@ -99,7 +97,6 @@ const FeedPrice = () => {
       ],
     };
 
-    console.log("req Body", requestBody);
     // request POST
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
@@ -118,7 +115,6 @@ const FeedPrice = () => {
       .then((response) => response.json())
       .then((data) => {
         if (data.result) {
-          console.log("result after save", data.result);
           refreshStateAfterSave(data.result);
         } else {
           console.log(data.error);
@@ -130,17 +126,6 @@ const FeedPrice = () => {
 
     const feedPriceId = feedPriceData.feed_price_id || -1;
     const refreshStateAfterSave = (feedPrice) => {
-      console.log("feed id", feedPrice[feedPriceId]);
-      // if it's new than new save
-      // if (feedPriceId < 0)
-
-      //   feedPriceHistories.unshift({
-      //     date:
-      //     feed_price_id: feedPrice.feed_price_id,
-      //     feed_type:
-      //     feed_unit:
-      //     price_per_unit
-      //   });
       setShouldRefresh(true);
       history.push({
         pathname: "/fillData/feed-price",

@@ -62,6 +62,7 @@ const ActivityMove = () => {
   const [pondActivities, setPondActivities] = useState(activities || []);
   const [activePondId, setActivePondId] = useState(active_pond_id ?? -1);
   const [shouldRefresh, setShouldRefresh] = useState(false);
+  const [isChecked, setIsChecked] = useState(false);
 
   // set stateful variables
   const [moveData, setMoveData] = useState({
@@ -142,6 +143,10 @@ const ActivityMove = () => {
       });
     }
   }, [activePondId, shouldRefresh]);
+
+  const handleIsChanged = () => {
+    setIsChecked(!isChecked);
+  };
 
   const handleChangePond = (event) => {
     event.preventDefault();
@@ -498,6 +503,21 @@ const ActivityMove = () => {
                       />
                     </td>
                   </tr>
+                  {!activity_id && (
+                    <tr>
+                      <td className="text-end pe-4" style={{ width: "30%" }}>
+                        ปิดบ่อ:
+                      </td>
+                      <td className="text-start">
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={handleIsChanged}
+                          className="form-check-input"
+                        />
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>

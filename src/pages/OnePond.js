@@ -141,6 +141,15 @@ const OnePond = () => {
   }
 
   const thaiDate = `${day} ${thaiMonths[monthIndex]} ${year}`;
+
+  // payload for refractor
+  const mainDetail = {
+    จำนวนวัน: `${diffDay} วัน`,
+    วันที่เริ่มเลี้ยง: thaiDate,
+    จำนวนเหยื่อสด: `${totalFeed} ลัง`,
+    ต้นทุน: `${formatNumberWithCommas(Math.round(activePond.cost))} ฿`,
+    กำไรสุทธิ: `${formatNumberWithCommas(Math.round(activePond.profit))} ฿`,
+  };
   return (
     <div className="container">
       <div className="row">
@@ -151,39 +160,25 @@ const OnePond = () => {
                 {activePond.pond_name}
                 {/* บ่อ: {activePond.pond_name.slice(4)} */}
               </div>
-              <div className="col-9 text-start status text-muted">
-                {activePond.record_status === "A" ? "active" : "closed"}
+              <div className="col-9 d-flex flex-column align-items-start justify-content-end">
+                <span className="btn btn-warning ms-1">
+                  {activePond.record_status === "A"
+                    ? "ปัจจุบันเลี้ยง"
+                    : "ปิดบ่อ"}
+                </span>
               </div>
             </div>
           </div>
           <table className="table table-borderless text-center margin-top">
             <tbody>
               <tr>
-                <td>
-                  <span className="line-height">จำนวนวัน</span>
-                  <br />
-                  {diffDay} วัน
-                </td>
-                <td>
-                  <span className="line-height">วันที่เริ่มเลี้ยง</span>
-                  <br />
-                  {thaiDate}
-                </td>
-                <td>
-                  <span className="line-height">จำนวนเหยื่อสด</span>
-                  <br />
-                  {totalFeed} ลัง
-                </td>
-                <td>
-                  <span className="line-height">ต้นทุน</span>
-                  <br />
-                  {formatNumberWithCommas(Math.round(activePond.cost))} ฿
-                </td>
-                <td>
-                  <span className="line-height">กำไรสุทธิ</span>
-                  <br />
-                  {formatNumberWithCommas(Math.round(activePond.profit))} ฿
-                </td>
+                {Object.entries(mainDetail).map(([header, detail]) => (
+                  <td>
+                    <span className="line-height fw-bold">{header}</span>
+                    <br />
+                    {detail}
+                  </td>
+                ))}
               </tr>
             </tbody>
           </table>
@@ -218,7 +213,7 @@ const OnePond = () => {
             </div>
             <table className="table" style={{ width: "100%" }}>
               <tbody>
-                {activities.map((act, index) => (
+                {activities.slice(0, 5).map((act, index) => (
                   <Fragment key={index}>
                     <tr>
                       <td style={{ width: "45%", verticalAlign: "middle" }}>
@@ -232,14 +227,25 @@ const OnePond = () => {
                         }}
                       >
                         <Link
-                          to={`/fillData/${act.activity_type}`}
+                          // to={`/fillData/${act.activity_type}`}
+                          // state={{
+                          //   activity_id: act.activity_id,
+                          // }}
+                          to={{
+                            pathname: `/fillData/${act.activity_type}`,
+                            state: {
+                              farm: activePond.farm,
+                              pond_id: activePond.pondId,
+                              pond_name: activePond.pondName,
+                              active_pond_id: activePondId,
+                              activity_id: act.activity_id,
+                              activities: activities,
+                            },
+                          }}
                           className="text-decoration-none text-dark"
                           style={{
                             fontWeight: "bolder",
                             whiteSpace: "pre-line",
-                          }}
-                          state={{
-                            activity_id: act.activity_id,
                           }}
                         >
                           {act.detail}
@@ -261,7 +267,7 @@ const OnePond = () => {
             </div>
             <table className="table text-center">
               <tbody>
-                {histories.map((his) => (
+                {histories.slice(0, 5).map((his) => (
                   <Fragment key={his.active_pond_id}>
                     <tr>
                       <td

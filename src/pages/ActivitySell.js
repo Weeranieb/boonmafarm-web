@@ -36,6 +36,7 @@ const ActivitySell = () => {
   const [pondActivities, setPondActivities] = useState(activities || []);
   const [activePondId, setActivePondId] = useState(active_pond_id ?? -1);
   const [shouldRefresh, setShouldRefresh] = useState(false);
+  const [isChecked, setIsChecked] = useState(false);
 
   // set main stateful variables
   const [sellData, setSellData] = useState({
@@ -127,12 +128,17 @@ const ActivitySell = () => {
     }));
   };
 
+  const handleIsChanged = () => {
+    setIsChecked(!isChecked);
+  };
+
   const handleSearchPond = (event) => {
     event.preventDefault();
     setSellData({
       date_issued: "",
       sell_detail: [],
       sum_profit: 0,
+      additional_cost: "",
     });
 
     initRow([]);
@@ -298,8 +304,8 @@ const ActivitySell = () => {
       no: rowLength + 1,
       sell_detail_id: newSellDetailId,
       size: "ปลา 9", // Set an initial value for size
-      total_amount: 0, // Set an initial value for total_amount
-      price_per_kilo: 0, // Set an initial value for price_per_kilo
+      total_amount: "", // Set an initial value for total_amount
+      price_per_kilo: "", // Set an initial value for price_per_kilo
       total: 0, // Set an initial value for total
       isShow: true,
     };
@@ -455,9 +461,24 @@ const ActivitySell = () => {
                     onValUpdate={onValUpdate}
                   />
                   <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
+                    {activity_id ? (
+                      <td colSpan={3}></td>
+                    ) : (
+                      <Fragment>
+                        <td colSpan={2} className="text-end align-middle">
+                          ปิดบ่อ:
+                        </td>
+                        <td className="text-start align-middle">
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={handleIsChanged}
+                            className="form-check-input"
+                          />
+                        </td>
+                      </Fragment>
+                    )}
+
                     <td className="text-end align-middle">รายได้ทั้งหมด</td>
                     <td>
                       <input
