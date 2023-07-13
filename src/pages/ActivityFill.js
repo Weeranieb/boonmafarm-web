@@ -58,9 +58,10 @@ const ActivityFill = () => {
           if (result.error) console.log(result.error);
           else {
             result.date_issued = result.date_issued.substring(0, 10);
-            result.cost =
+            result.cost = (
               result.amount * result.price_per_unit * result.weight_per_fish +
-              (result.additional_cost || 0);
+              (result.additional_cost || 0)
+            ).toFixed(2);
             setFillData(result);
           }
         }
@@ -189,7 +190,8 @@ const ActivityFill = () => {
 
     const tempActivePondId = active_pond_id || -1;
 
-    const cost = amount * price_per_unit * weight_per_fish + additional_cost;
+    let cost = amount * price_per_unit * weight_per_fish + additional_cost;
+    cost = cost.toFixed(2);
     setFillData((prevState) => ({
       ...prevState,
       amount,

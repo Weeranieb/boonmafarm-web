@@ -15,6 +15,7 @@ const OnePond = () => {
   const [totalFeed, setTotalFeed] = useState(0);
   const [activities, setActivities] = useState([]);
   const [histories, setHistories] = useState([]);
+  const [canCreateNewPond, setCanCreateNewPond] = useState(false);
 
   useEffect(() => {
     const fetchActivePondDetail = async () => {
@@ -57,7 +58,8 @@ const OnePond = () => {
         );
         const data = await response.json();
         if (data.result) {
-          setHistories(data.result);
+          setHistories(data.result.histories);
+          setCanCreateNewPond(data.result.is_all_close);
         } else {
           console.log(data.error);
         }
@@ -160,12 +162,28 @@ const OnePond = () => {
                 {activePond.pond_name}
                 {/* บ่อ: {activePond.pond_name.slice(4)} */}
               </div>
-              <div className="col-9 d-flex flex-column align-items-start justify-content-end">
-                <span className="btn btn-warning ms-1">
-                  {activePond.record_status === "A"
-                    ? "ปัจจุบันเลี้ยง"
-                    : "ปิดบ่อ"}
+              <div
+                className="col-9 d-flex align-items-start justify-content-between align-bottom"
+                style={{ position: "relative", top: "8px" }}
+              >
+                <span className="btn btn-warning">
+                  {activePond.is_close === "N" ? "ปัจจุบันเลี้ยง" : "ปิดบ่อ"}
                 </span>
+                {canCreateNewPond && (
+                  <Link
+                    to={{
+                      pathname: `/fillData/fill`,
+                      state: {
+                        farm: activePond.farm,
+                        pond_id: activePond.pond_id,
+                        pond_name: activePond.pond_name,
+                      },
+                    }}
+                    className="btn btn-outline-secondary ms-1"
+                  >
+                    เปิดบ่อ
+                  </Link>
+                )}
               </div>
             </div>
           </div>
@@ -227,10 +245,6 @@ const OnePond = () => {
                         }}
                       >
                         <Link
-                          // to={`/fillData/${act.activity_type}`}
-                          // state={{
-                          //   activity_id: act.activity_id,
-                          // }}
                           to={{
                             pathname: `/fillData/${act.activity_type}`,
                             state: {

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { FileUploader } from "react-drag-drop-files";
 import "./Upload.css";
 
-const fileTypes = ["JPG", "PNG", "GIF"];
+const fileTypes = ["CSV", "XLSX", "XLS"];
 
 const Upload = () => {
   const [file, setFile] = useState(null);
