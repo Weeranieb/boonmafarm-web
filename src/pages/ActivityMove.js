@@ -279,11 +279,9 @@ const ActivityMove = () => {
       [name]: value,
       pondId: tempPondId,
     }));
-    console.log(selectToPond);
   };
 
-  const saveMove = (status) => {
-    console.log("select To pond", selectToPond);
+  const saveMove = () => {
     const fish_amount = Number(moveData.fish_amount);
     const price_per_kilo = Number(moveData.price_per_kilo);
     const weight_per_fish = Number(moveData.weight_per_fish);
@@ -314,7 +312,7 @@ const ActivityMove = () => {
         price_per_kilo: price_per_kilo,
         additional_cost: additional_cost,
         date_issued: `${moveData.date_issued}T00:00:00Z`,
-        record_status: status,
+        record_status: "A",
       },
     };
 
@@ -345,7 +343,6 @@ const ActivityMove = () => {
       });
 
     const refreshStateAfterSave = (moveHistory) => {
-      let filterPondAct;
       // if it's new than new save
       if (moveInId < 0)
         pondActivities.unshift({
@@ -355,26 +352,76 @@ const ActivityMove = () => {
           detail: `ย้ายปลา บ่อ${selectFarmAndPond.pondName}ไปบ่อ${selectToPond.pondName}`,
         });
 
-      if (status === "S") {
-        const conditionToRemove = (obj) =>
-          obj.activity_type === "move" &&
-          obj.activity_id === moveHistory.move_id;
+      history.push({
+        pathname: "/fillData/move", // or the current path if needed
+        state: {
+          farm: selectFarmAndPond.farm,
+          to_farm: selectToPond.farm,
+          pond_id: selectFarmAndPond.pondId,
+          to_pond_id: selectToPond.pondId,
+          pond_name: selectFarmAndPond.pondName,
+          to_pond_name: selectToPond.pondName,
+          active_pond_id: moveHistory.from_pond_id,
+          activity_id: moveHistory.move_id,
+          activities: pondActivities,
+          is_closed: isChecked,
+        },
+      });
 
-        filterPondAct = pondActivities.filter((obj) => !conditionToRemove(obj));
-      }
+      // Reload the page after history.push
+      window.location.reload();
+    };
+  };
+
+  const deleteMove = () => {
+    const tempActivePondId = active_pond_id || -1;
+    const moveId = moveData.move_id || -1;
+
+    // prepare to delete sell history
+    const headers = new Headers();
+    headers.append("Content-Type", "application/json");
+
+    let requestOptions = {
+      method: "DELETE",
+      headers: headers,
+    };
+
+    fetch(
+      `${process.env.REACT_APP_BACKEND}/api/v1/activity/deleteMoveHistory?active_pond_id=${tempActivePondId}&move_id=${moveId}`,
+      requestOptions
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.result) {
+          refreshStateAfterSave(moveId);
+        } else {
+          console.log(data.error);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
+    const refreshStateAfterSave = (moveId) => {
+      let filterPondAct;
+
+      const conditionToRemove = (obj) =>
+        obj.activity_type === "move" && obj.activity_id === moveId;
+
+      filterPondAct = pondActivities.filter((obj) => !conditionToRemove(obj));
 
       history.push({
         pathname: "/fillData/move", // or the current path if needed
         state: {
           farm: selectFarmAndPond.farm,
-          to_farm: status === "A" ? selectToPond.farm : undefined,
+          to_farm: undefined,
           pond_id: selectFarmAndPond.pondId,
-          to_pond_id: status === "A" ? selectToPond.pondId : undefined,
+          to_pond_id: undefined,
           pond_name: selectFarmAndPond.pondName,
-          to_pond_name: status === "A" ? selectToPond.pondName : undefined,
-          active_pond_id: moveHistory.from_pond_id,
-          activity_id: status === "A" ? moveHistory.move_id : undefined,
-          activities: status === "A" ? pondActivities : filterPondAct,
+          to_pond_name: undefined,
+          active_pond_id: activePondId,
+          activity_id: undefined,
+          activities: filterPondAct,
           is_closed: isChecked,
         },
       });
@@ -386,12 +433,12 @@ const ActivityMove = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    saveMove("A");
+    saveMove();
   };
 
   const handleDelete = (event) => {
     event.preventDefault();
-    saveMove("S");
+    deleteMove();
   };
 
   return (

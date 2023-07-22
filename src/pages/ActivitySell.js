@@ -246,7 +246,7 @@ const ActivitySell = () => {
     });
   };
 
-  const saveSell = (status) => {
+  const saveSell = () => {
     const tempActivePondId = active_pond_id || -1;
     const sellId = sellData.sell_id || -1;
 
@@ -274,7 +274,7 @@ const ActivitySell = () => {
         merchant_id: Number(sellData.merchant_id),
         additional_cost: Number(sellData.additional_cost),
         date_issued: `${sellData.date_issued}T00:00:00Z`,
-        record_status: status,
+        record_status: "A",
       },
       sell_detail: sellDetail,
     };
@@ -306,7 +306,6 @@ const ActivitySell = () => {
       });
 
     const refreshStateAfterSave = (sellHistory) => {
-      let filterPondAct = [];
       // if it's new than new save
       if (sellId < 0)
         pondActivities.unshift({
@@ -316,15 +315,6 @@ const ActivitySell = () => {
           detail: `ขายปลา บ่อ ${pond_name}`,
         });
 
-      if (status === "S") {
-        console.log("prepare to delete", sellHistory, pondActivities);
-
-        const conditionToRemove = (obj) =>
-          obj.activity_type === "sell" &&
-          obj.activity_id === sellHistory.history.sell_id;
-
-        filterPondAct = pondActivities.filter((obj) => !conditionToRemove(obj));
-      }
       history.push({
         pathname: "/fillData/sell", // or the current path if needed
         state: {
@@ -332,8 +322,62 @@ const ActivitySell = () => {
           pond_id: selectFarm.pondId,
           pond_name: selectFarm.pondName,
           active_pond_id: sellHistory.history.active_pond_id,
-          activity_id: status === "A" ? sellHistory.history.sell_id : undefined,
-          activities: status === "A" ? pondActivities : filterPondAct,
+          activity_id: sellHistory.history.sell_id,
+          activities: pondActivities,
+          is_closed: isChecked,
+        },
+      });
+
+      // Reload the page after history.push
+      window.location.reload();
+    };
+  };
+
+  const deleteSell = () => {
+    const tempActivePondId = active_pond_id || -1;
+    const sellId = sellData.sell_id || -1;
+
+    // prepare to delete sell history
+    const headers = new Headers();
+    headers.append("Content-Type", "application/json");
+
+    let requestOptions = {
+      method: "DELETE",
+      headers: headers,
+    };
+
+    fetch(
+      `${process.env.REACT_APP_BACKEND}/api/v1/activity/deleteSellHistory?active_pond_id=${tempActivePondId}&sell_id=${sellId}`,
+      requestOptions
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.result) {
+          refreshStateAfterSave(sellId);
+        } else {
+          console.log(data.error);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
+    const refreshStateAfterSave = (sellId) => {
+      let filterPondAct = [];
+      const conditionToRemove = (obj) =>
+        obj.activity_type === "sell" && obj.activity_id === sellId;
+
+      filterPondAct = pondActivities.filter((obj) => !conditionToRemove(obj));
+
+      history.push({
+        pathname: "/fillData/sell", // or the current path if needed
+        state: {
+          farm: selectFarm.farm,
+          pond_id: selectFarm.pondId,
+          pond_name: selectFarm.pondName,
+          active_pond_id: activePondId,
+          activity_id: undefined,
+          activities: filterPondAct,
           is_closed: isChecked,
         },
       });
@@ -345,7 +389,7 @@ const ActivitySell = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    saveSell("A");
+    saveSell();
   };
 
   const addRowTable = () => {
@@ -407,7 +451,7 @@ const ActivitySell = () => {
 
   const handleDelete = (event) => {
     event.preventDefault();
-    saveSell("S");
+    deleteSell();
   };
   // const handleDelete = (event) => {
   //   event.preventDefault();
