@@ -27,20 +27,8 @@ const ActivityMove = () => {
     active_pond_id,
     activity_id,
     activities,
+    is_closed,
   } = location.state ?? {};
-
-  console.log(
-    "this page states are",
-    farm,
-    to_farm,
-    pond_id,
-    to_pond_id,
-    pond_name,
-    to_pond_name,
-    active_pond_id,
-    activity_id,
-    activities
-  );
 
   // set state
   const [selectFarmAndPond, setSelectFarmAndPond] = useState({
@@ -102,7 +90,7 @@ const ActivityMove = () => {
                   console.log(result.error);
                   reject(result.error);
                 } else {
-                  resolve([result.farm, result.pond_name]);
+                  resolve([result.farm, result.pond_name, result.pond_id]);
                 }
               }
             })
@@ -124,16 +112,17 @@ const ActivityMove = () => {
             // set farm property
             result.date_issued = result.date_issued.substring(0, 10);
             getFarmAndPondId(result.to_pond_id)
-              .then(([tempFarm, tempPondName]) => {
+              .then(([tempFarm, tempPondName, tempPondId]) => {
                 result.to_farm = tempFarm;
                 result.to_pond_name = swappedPondNameMap.get(tempPondName);
                 setMoveData(result);
                 setSelectToPond((prevState) => ({
                   ...prevState,
                   farm: tempFarm,
+                  pondId: tempPondId,
                   pondName: swappedPondNameMap.get(tempPondName),
+                  pondList: rowDailyFeeds.get(tempFarm),
                 }));
-                console.log("selected pond", selectToPond);
               })
               .catch((error) => {
                 console.log(error);
@@ -192,7 +181,6 @@ const ActivityMove = () => {
 
   const handleSearchPond = (event) => {
     event.preventDefault();
-    console.log(selectFarmAndPond);
     setMoveData({
       move_id: activity_id ?? -1,
       date_issued: "",
@@ -278,6 +266,7 @@ const ActivityMove = () => {
         setSelectToPond((prevState) => ({
           ...prevState,
           pondName: ponds[0].name,
+          pondId: ponds[0].pond_id,
           pondList: ponds,
         }));
         tempPondId = pondNameMapId.get(ponds[0].name);
@@ -288,18 +277,13 @@ const ActivityMove = () => {
     setSelectToPond((prevState) => ({
       ...prevState,
       [name]: value,
-    }));
-
-    setSelectToPond((prevState) => ({
-      ...prevState,
       pondId: tempPondId,
     }));
-
     console.log(selectToPond);
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
+  const saveMove = (status) => {
+    console.log("select To pond", selectToPond);
     const fish_amount = Number(moveData.fish_amount);
     const price_per_kilo = Number(moveData.price_per_kilo);
     const weight_per_fish = Number(moveData.weight_per_fish);
@@ -320,19 +304,19 @@ const ActivityMove = () => {
       to_pond_id: selectToPond.pondId,
       active_pond_id: tempActivePondId,
       move_id: moveInId,
+      is_closed: isChecked,
       move_history: {
         move_id: moveInId,
         from_pond_id: tempActivePondId,
-        to_pond_id: -1,
+        // to_pond_id: -1,
         fish_amount: fish_amount,
         weight_per_fish: weight_per_fish,
         price_per_kilo: price_per_kilo,
         additional_cost: additional_cost,
         date_issued: `${moveData.date_issued}T00:00:00Z`,
-        record_status: "A",
+        record_status: status,
       },
     };
-    console.log(requestBody);
 
     // request POST
     const headers = new Headers();
@@ -361,6 +345,7 @@ const ActivityMove = () => {
       });
 
     const refreshStateAfterSave = (moveHistory) => {
+      let filterPondAct;
       // if it's new than new save
       if (moveInId < 0)
         pondActivities.unshift({
@@ -369,26 +354,54 @@ const ActivityMove = () => {
           date: changeTimeUTCToThaiDate(moveHistory.date_issued),
           detail: `ย้ายปลา บ่อ${selectFarmAndPond.pondName}ไปบ่อ${selectToPond.pondName}`,
         });
+
+      if (status === "S") {
+        const conditionToRemove = (obj) =>
+          obj.activity_type === "move" &&
+          obj.activity_id === moveHistory.move_id;
+
+        filterPondAct = pondActivities.filter((obj) => !conditionToRemove(obj));
+      }
+
       history.push({
         pathname: "/fillData/move", // or the current path if needed
         state: {
           farm: selectFarmAndPond.farm,
-          to_farm: selectToPond.farm,
+          to_farm: status === "A" ? selectToPond.farm : undefined,
           pond_id: selectFarmAndPond.pondId,
-          to_pond_id: selectToPond.pondId,
+          to_pond_id: status === "A" ? selectToPond.pondId : undefined,
           pond_name: selectFarmAndPond.pondName,
-          to_pond_name: selectToPond.pondName,
+          to_pond_name: status === "A" ? selectToPond.pondName : undefined,
           active_pond_id: moveHistory.from_pond_id,
-          activity_id: moveHistory.move_id,
-          activities: pondActivities,
+          activity_id: status === "A" ? moveHistory.move_id : undefined,
+          activities: status === "A" ? pondActivities : filterPondAct,
+          is_closed: isChecked,
         },
       });
+
+      // Reload the page after history.push
+      window.location.reload();
     };
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    saveMove("A");
+  };
+
+  const handleDelete = (event) => {
+    event.preventDefault();
+    saveMove("S");
   };
 
   return (
     <div>
-      <div className="header">กิจกรรมบ่อ {pond_name || "1ซ้าย"}</div>
+      <div className="header">
+        กิจกรรมบ่อ {pond_name || "1ซ้าย"}{" "}
+        <span className="btn btn-primary btn-sm ms-3">
+          {is_closed ? "ปิดบ่อ" : "ปัจจุบันเลี้ยง"}
+        </span>
+      </div>
       <hr />
       <div className="row">
         <div className="col-6">
@@ -400,157 +413,166 @@ const ActivityMove = () => {
             active_pond_id={active_pond_id}
             activity_id={activity_id}
             activities={activities}
+            is_closed={is_closed}
           />
-          <form onSubmit={handleSubmit}>
-            <div className="input">
-              <table
-                className="text-center table table-borderless"
-                width="100%"
-              >
-                <tbody>
-                  <tr>
-                    <td className="text-end pe-4">
-                      <label htmlFor="date_issued">วันที่ลงปลา:</label>
-                    </td>
-                    <td className="text-start">
-                      <input
-                        type="date"
-                        name="date_issued"
-                        id="date_issued"
-                        className="form-control form-control-sm"
-                        style={{ width: "185px" }}
-                        onChange={handleChange}
-                        value={moveData.date_issued}
-                      />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="text-end pe-4" style={{ width: "30%" }}>
-                      บ่อที่ย้ายลง:
-                    </td>
-                    <td className="text-start">
-                      <SearchFarmNoSearch
-                        onChange={handleChangeToPond}
-                        property_pond={selectToPond}
-                      />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="text-end pe-4" style={{ width: "30%" }}>
-                      จำนวนปลาที่ลง:
-                    </td>
-                    <td className="text-start">
-                      <input
-                        type="text"
-                        name="fish_amount"
-                        inputMode="numeric"
-                        id="fish_amount"
-                        className="form-control form-control-sm"
-                        style={{ width: "185px" }}
-                        onChange={handleChange}
-                        value={moveData.fish_amount}
-                      />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="text-end pe-4" style={{ width: "30%" }}>
-                      น้ำหนักปลาต่อตัว:
-                    </td>
-                    <td className="text-start">
-                      <input
-                        type="text"
-                        name="weight_per_fish"
-                        inputMode="numeric"
-                        id="weight_per_fish"
-                        className="form-control form-control-sm"
-                        style={{ width: "185px" }}
-                        onChange={handleChange}
-                        value={moveData.weight_per_fish}
-                      />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="text-end pe-4" style={{ width: "30%" }}>
-                      ราคาปลา:
-                    </td>
-                    <td className="text-start">
-                      <input
-                        type="text"
-                        name="price_per_kilo"
-                        inputMode="numeric"
-                        id="price_per_kilo"
-                        className="form-control form-control-sm"
-                        style={{ width: "185px" }}
-                        onChange={handleChange}
-                        value={moveData.price_per_kilo}
-                      />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="text-end pe-4" style={{ width: "30%" }}>
-                      ค่าใช้จ่าย:
-                    </td>
-                    <td className="text-start">
-                      <input
-                        type="text"
-                        name="additional_cost"
-                        inputMode="numeric"
-                        id="additional_cost"
-                        className="form-control form-control-sm"
-                        style={{ width: "185px" }}
-                        onChange={handleChange}
-                        value={moveData.additional_cost}
-                      />
-                    </td>
-                  </tr>
-                  {!activity_id && (
+          {(!is_closed || activity_id > 0) && (
+            <form onSubmit={handleSubmit}>
+              <div className="input">
+                <table
+                  className="text-center table table-borderless"
+                  width="100%"
+                >
+                  <tbody>
                     <tr>
-                      <td className="text-end pe-4" style={{ width: "30%" }}>
-                        ปิดบ่อ:
+                      <td className="text-end pe-4">
+                        <label htmlFor="date_issued">วันที่ลงปลา:</label>
                       </td>
                       <td className="text-start">
                         <input
-                          type="checkbox"
-                          checked={isChecked}
-                          onChange={handleIsChanged}
-                          className="form-check-input"
+                          type="date"
+                          name="date_issued"
+                          id="date_issued"
+                          className="form-control form-control-sm"
+                          style={{ width: "185px" }}
+                          onChange={handleChange}
+                          value={moveData.date_issued}
                         />
                       </td>
                     </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-            <div style={{ height: "20px" }}></div>
-            <button className="btn btn-primary btn-sm ps-2 pe-2">บันทึก</button>
-            <Link
-              to={{
-                pathname: `/fillData/move`,
-                state: {
-                  farm: selectFarmAndPond.farm,
-                  to_farm: selectToPond.farm,
-                  pond_id: selectFarmAndPond.pondId,
-                  to_pond_id: selectToPond.pondId,
-                  pond_name: selectFarmAndPond.pondName,
-                  to_pond_name: selectToPond.pondName,
-                  active_pond_id: activePondId,
-                  activity_id: activity_id,
-                  activities: pondActivities,
-                },
-              }}
-              className="btn btn-warning ms-1 btn-sm"
-              onClick={() => setShouldRefresh(true)}
-            >
-              ยกเลิก
-            </Link>
-            <Link
-              to="#!"
-              className="btn btn-danger ms-1 btn-sm ps-3 pe-3"
-              onClick={() => console.log("not implement")}
-            >
-              ลบ
-            </Link>
-          </form>
+                    <tr>
+                      <td className="text-end pe-4" style={{ width: "30%" }}>
+                        บ่อที่ย้ายลง:
+                      </td>
+                      <td className="text-start">
+                        <SearchFarmNoSearch
+                          onChange={handleChangeToPond}
+                          property_pond={selectToPond}
+                        />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="text-end pe-4" style={{ width: "30%" }}>
+                        จำนวนปลาที่ลง:
+                      </td>
+                      <td className="text-start">
+                        <input
+                          type="text"
+                          name="fish_amount"
+                          inputMode="numeric"
+                          id="fish_amount"
+                          className="form-control form-control-sm"
+                          style={{ width: "185px" }}
+                          onChange={handleChange}
+                          value={moveData.fish_amount}
+                        />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="text-end pe-4" style={{ width: "30%" }}>
+                        น้ำหนักปลาต่อตัว:
+                      </td>
+                      <td className="text-start">
+                        <input
+                          type="text"
+                          name="weight_per_fish"
+                          inputMode="numeric"
+                          id="weight_per_fish"
+                          className="form-control form-control-sm"
+                          style={{ width: "185px" }}
+                          onChange={handleChange}
+                          value={moveData.weight_per_fish}
+                        />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="text-end pe-4" style={{ width: "30%" }}>
+                        ราคาปลา:
+                      </td>
+                      <td className="text-start">
+                        <input
+                          type="text"
+                          name="price_per_kilo"
+                          inputMode="numeric"
+                          id="price_per_kilo"
+                          className="form-control form-control-sm"
+                          style={{ width: "185px" }}
+                          onChange={handleChange}
+                          value={moveData.price_per_kilo}
+                        />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="text-end pe-4" style={{ width: "30%" }}>
+                        ค่าใช้จ่าย:
+                      </td>
+                      <td className="text-start">
+                        <input
+                          type="text"
+                          name="additional_cost"
+                          inputMode="numeric"
+                          id="additional_cost"
+                          className="form-control form-control-sm"
+                          style={{ width: "185px" }}
+                          onChange={handleChange}
+                          value={moveData.additional_cost}
+                        />
+                      </td>
+                    </tr>
+                    {!activity_id && (
+                      <tr>
+                        <td className="text-end pe-4" style={{ width: "30%" }}>
+                          ปิดบ่อ:
+                        </td>
+                        <td className="text-start">
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={handleIsChanged}
+                            className="form-check-input"
+                          />
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+              <div style={{ height: "20px" }}></div>
+              <button
+                type="submit"
+                className="btn btn-primary btn-sm ps-2 pe-2"
+              >
+                บันทึก
+              </button>
+              <Link
+                to={{
+                  pathname: `/fillData/move`,
+                  state: {
+                    farm: selectFarmAndPond.farm,
+                    to_farm: selectToPond.farm,
+                    pond_id: selectFarmAndPond.pondId,
+                    to_pond_id: selectToPond.pondId,
+                    pond_name: selectFarmAndPond.pondName,
+                    to_pond_name: selectToPond.pondName,
+                    active_pond_id: activePondId,
+                    activity_id: activity_id,
+                    activities: pondActivities,
+                    is_closed: is_closed,
+                  },
+                }}
+                className="btn btn-warning ms-1 btn-sm"
+                onClick={() => setShouldRefresh(true)}
+              >
+                ยกเลิก
+              </Link>
+              <button
+                type="button" // Specify type as "button" to prevent form submission
+                className="btn btn-danger ms-1 btn-sm ps-3 pe-3"
+                onClick={handleDelete}
+              >
+                ลบ
+              </button>
+            </form>
+          )}
         </div>
         <div className="col">
           <div className="text-end select-date mb-4">
@@ -558,6 +580,7 @@ const ActivityMove = () => {
               <SearchFarm
                 onChange={handleChangePond}
                 property_pond={selectFarmAndPond}
+                is_closed={is_closed}
               />
             </form>
           </div>
@@ -604,6 +627,7 @@ const ActivityMove = () => {
                               active_pond_id: activePondId,
                               activity_id: activity.activity_id,
                               activities: pondActivities,
+                              is_closed: is_closed,
                             },
                           }}
                           className="link-dark"

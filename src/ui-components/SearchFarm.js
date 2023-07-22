@@ -1,5 +1,7 @@
 const SearchFarm = (props) => {
-  const { onChange, property_pond } = props;
+  const { onChange, property_pond, is_closed } = props;
+
+  // TODO add warning sign if it's close it will lose and come again at บ่อ
 
   const selectedPondName =
     property_pond && property_pond.pondName ? property_pond.pondName : "";

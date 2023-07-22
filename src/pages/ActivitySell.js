@@ -14,16 +14,16 @@ import { merchantNameById } from "../constants/merchant";
 const ActivitySell = () => {
   const history = useHistory();
   const location = useLocation();
-  const { farm, pond_id, pond_name, active_pond_id, activity_id, activities } =
-    location.state ?? {};
-  console.log(
+  const {
     farm,
     pond_id,
     pond_name,
     active_pond_id,
     activity_id,
-    activities
-  );
+    activities,
+    is_closed,
+  } = location.state ?? {};
+
   //set state
   const [newSellDetailId, setNewSellDetailId] = useState(-1);
   const [rows, initRow] = useState([]);
@@ -70,7 +70,6 @@ const ActivitySell = () => {
         if (result) {
           if (result.error) console.log(result.error);
           else {
-            console.log("result issss", result);
             result.history.date_issued = result.history.date_issued.substring(
               0,
               10
@@ -89,7 +88,6 @@ const ActivitySell = () => {
             );
             result.history.sum_profit = initProfit;
             setSellData(result.history);
-            console.log("our rows are", rows);
           }
         }
       });
@@ -120,10 +118,6 @@ const ActivitySell = () => {
     setSelectFarm((prevState) => ({
       ...prevState,
       [name]: value,
-    }));
-
-    setSelectFarm((prevState) => ({
-      ...prevState,
       pondId: tempPondId,
     }));
   };
@@ -202,19 +196,57 @@ const ActivitySell = () => {
     }
   };
 
+  // const handleChange = (event) => {
+  //   event.preventDefault();
+  //   let { value, name } = event.target;
+  //   value = value || ""; // Use an empty string as the default value if undefined
+  //   setSellData((prevState) => ({
+  //     ...prevState,
+  //     [name]: value,
+  //   }));
+
+  //   if (name === "additional_cost") {
+  //     console.log("here is row", rows);
+  //     const initProfit = rows.reduce(
+  //       (accumulator, sell) =>
+  //         accumulator + sell.total_amount * sell.price_per_kilo,
+  //       -Number(value)
+  //     );
+
+  //     setSellData((prevState) => ({
+  //       ...prevState,
+  //       sum_profit: initProfit,
+  //     }));
+  //   }
+  // };
+
   const handleChange = (event) => {
     event.preventDefault();
-    let { value, name } = event.target;
-    value = value || ""; // Use an empty string as the default value if undefined
-    setSellData((prevState) => ({
-      ...prevState,
-      [name]: value,
-    }));
+    const { value, name } = event.target;
+
+    // Use an empty string as the default value if 'value' is undefined
+    const sanitizedValue = value || "";
+
+    setSellData((prevState) => {
+      // Calculate the initial profit (sum of total_amount * price_per_kilo) with additional_cost subtracted
+      const initProfit =
+        name === "additional_cost"
+          ? rows.reduce(
+              (accumulator, sell) =>
+                accumulator + sell.total_amount * sell.price_per_kilo,
+              -Number(sanitizedValue)
+            )
+          : prevState.sum_profit;
+
+      return {
+        ...prevState,
+        [name]: sanitizedValue,
+        sum_profit: initProfit,
+      };
+    });
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-
+  const saveSell = (status) => {
     const tempActivePondId = active_pond_id || -1;
     const sellId = sellData.sell_id || -1;
 
@@ -235,18 +267,17 @@ const ActivitySell = () => {
       pond_id: selectFarm.pondId,
       active_pond_id: tempActivePondId,
       sell_id: sellId,
+      is_closed: isChecked,
       sell_history: {
         sell_id: sellId,
         active_pond_id: tempActivePondId,
         merchant_id: Number(sellData.merchant_id),
         additional_cost: Number(sellData.additional_cost),
         date_issued: `${sellData.date_issued}T00:00:00Z`,
-        record_status: "A",
+        record_status: status,
       },
       sell_detail: sellDetail,
     };
-
-    console.log("request body", requestBody);
 
     // prepare to save in
     const headers = new Headers();
@@ -265,7 +296,6 @@ const ActivitySell = () => {
       .then((response) => response.json())
       .then((data) => {
         if (data.result) {
-          console.log("result after save", data.result);
           refreshStateAfterSave(data.result);
         } else {
           console.log(data.error);
@@ -276,6 +306,7 @@ const ActivitySell = () => {
       });
 
     const refreshStateAfterSave = (sellHistory) => {
+      let filterPondAct = [];
       // if it's new than new save
       if (sellId < 0)
         pondActivities.unshift({
@@ -284,6 +315,16 @@ const ActivitySell = () => {
           date: changeTimeUTCToThaiDate(sellHistory.history.date_issued),
           detail: `ขายปลา บ่อ ${pond_name}`,
         });
+
+      if (status === "S") {
+        console.log("prepare to delete", sellHistory, pondActivities);
+
+        const conditionToRemove = (obj) =>
+          obj.activity_type === "sell" &&
+          obj.activity_id === sellHistory.history.sell_id;
+
+        filterPondAct = pondActivities.filter((obj) => !conditionToRemove(obj));
+      }
       history.push({
         pathname: "/fillData/sell", // or the current path if needed
         state: {
@@ -291,11 +332,20 @@ const ActivitySell = () => {
           pond_id: selectFarm.pondId,
           pond_name: selectFarm.pondName,
           active_pond_id: sellHistory.history.active_pond_id,
-          activity_id: sellHistory.history.sell_id,
-          activities: pondActivities,
+          activity_id: status === "A" ? sellHistory.history.sell_id : undefined,
+          activities: status === "A" ? pondActivities : filterPondAct,
+          is_closed: isChecked,
         },
       });
+
+      // Reload the page after history.push
+      window.location.reload();
     };
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    saveSell("A");
   };
 
   const addRowTable = () => {
@@ -355,9 +405,106 @@ const ActivitySell = () => {
     initRow(data);
   };
 
+  const handleDelete = (event) => {
+    event.preventDefault();
+    saveSell("S");
+  };
+  // const handleDelete = (event) => {
+  //   event.preventDefault();
+
+  //   // TODO else case use swal to tell user that it cannot delete
+  //   if (sellData.sell_id > 0) {
+  //     const tempActivePondId = active_pond_id;
+  //     const sellId = sellData.sell_id;
+
+  //     // set sellDetail
+  //     const sellDetail = [];
+  //     for (const detail of rows) {
+  //       detail.total_amount = Number(detail.total_amount);
+  //       detail.price_per_kilo = Number(detail.price_per_kilo);
+  //       detail.date_issued = sellData.date_issued;
+  //       detail.record_status = detail.isShow ? "A" : "S";
+  //       detail.sell_id = sellId;
+  //       if (detail.sell_detail_id > 0 || detail.record_status === "A") {
+  //         sellDetail.push(detail);
+  //       }
+  //     }
+
+  //     const requestBody = {
+  //       pond_id: selectFarm.pondId,
+  //       active_pond_id: tempActivePondId,
+  //       sell_id: sellId,
+  //       is_closed: isChecked,
+  //       sell_history: {
+  //         sell_id: sellId,
+  //         active_pond_id: tempActivePondId,
+  //         merchant_id: Number(sellData.merchant_id),
+  //         additional_cost: Number(sellData.additional_cost),
+  //         date_issued: `${sellData.date_issued}T00:00:00Z`,
+  //         record_status: "S",
+  //       },
+  //       sell_detail: sellDetail,
+  //     };
+
+  //     // prepare to save in
+  //     const headers = new Headers();
+  //     headers.append("Content-Type", "application/json");
+
+  //     let requestOptions = {
+  //       body: JSON.stringify(requestBody),
+  //       method: "POST",
+  //       headers: headers,
+  //     };
+
+  //     fetch(
+  //       `${process.env.REACT_APP_BACKEND}/api/v1/activity/saveSellHistory`,
+  //       requestOptions
+  //     )
+  //       .then((response) => response.json())
+  //       .then((data) => {
+  //         if (data.result) {
+  //           refreshStateAfterSave(data.result);
+  //         } else {
+  //           console.log(data.error);
+  //         }
+  //       })
+  //       .catch((err) => {
+  //         console.log(err);
+  //       });
+
+  //     const refreshStateAfterSave = (sellHistory) => {
+  //       // if it's new than new save
+  //       if (sellId < 0)
+  //         pondActivities.unshift({
+  //           activity_id: sellHistory.history.sell_id,
+  //           activity_type: "sell",
+  //           date: changeTimeUTCToThaiDate(sellHistory.history.date_issued),
+  //           detail: `ขายปลา บ่อ ${pond_name}`,
+  //         });
+  //       history.push({
+  //         pathname: "/fillData/sell", // or the current path if needed
+  //         state: {
+  //           farm: selectFarm.farm,
+  //           pond_id: selectFarm.pondId,
+  //           pond_name: selectFarm.pondName,
+  //           active_pond_id: sellHistory.history.active_pond_id,
+  //           // activity_id: sellHistory.history.sell_id,
+  //           activities: pondActivities,
+  //           is_closed: isChecked,
+  //         },
+  //       });
+  //     };
+  //   }
+  // };
+
   return (
     <div>
-      <div className="header">กิจกรรมบ่อ 3/2</div>
+      <div className="header">
+        กิจกรรมบ่อ {pond_name || "1ซ้าย"}
+        <span className="btn btn-primary btn-sm ms-3">
+          {is_closed ? "ปิดบ่อ" : "ปัจจุบันเลี้ยง"}
+        </span>
+      </div>
       <hr />
       <div className="row">
         <div className="col-6">
@@ -369,159 +516,166 @@ const ActivitySell = () => {
             active_pond_id={active_pond_id}
             activity_id={activity_id}
             activities={activities}
+            is_closed={is_closed}
           />
+          {(!is_closed || activity_id > 0) && (
+            <form onSubmit={handleSubmit}>
+              <div className="">
+                <table
+                  className="text-center table table-borderless"
+                  width="100%"
+                >
+                  <tbody>
+                    <tr>
+                      <td className="text-end pe-1 pt-2">
+                        <label htmlFor="date">วันที่ลงปลา:</label>
+                      </td>
+                      <td className="text-start">
+                        <input
+                          type="date"
+                          name="date_issued"
+                          id="date_issued"
+                          className="form-control form-control-sm"
+                          style={{ width: "125px" }}
+                          value={sellData.date_issued}
+                          onChange={handleChange}
+                        />
+                      </td>
+                      <td className="text-end  pt-2">
+                        <label htmlFor="date">ค่าใช้จ่าย:</label>
+                      </td>
+                      <td className="text-start">
+                        <input
+                          type="text"
+                          name="additional_cost"
+                          id="additional_cost"
+                          className="form-control form-control-sm"
+                          style={{ width: "80px" }}
+                          value={sellData.additional_cost}
+                          onChange={handleChange}
+                        />
+                      </td>
+                      <td className="text-end  pt-2">
+                        <label htmlFor="date">คนซื้อ:</label>
+                      </td>
+                      <td className="text-start">
+                        <select
+                          name="merchant_id"
+                          id="merchant_id"
+                          className="form-select form-select-sm"
+                          style={{ width: "80px" }}
+                          onChange={handleChange}
+                          value={sellData.merchant_id}
+                        >
+                          {Object.entries(merchantNameById).map(
+                            ([id, name]) => (
+                              <option key={id} value={id}>
+                                {name}
+                              </option>
+                            )
+                          )}
+                        </select>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div>
+                <table className="table table-borderless">
+                  <thead>
+                    <tr className="text-center">
+                      <th>ดัชนี</th>
+                      <th>ไซส์</th>
+                      <th>จำนวนปลา (กก.)</th>
+                      <th>ราคาปลาต่อกิโล</th>
+                      <th>ขายได้</th>
+                      <th>
+                        <button
+                          className="btn btn-danger btn-sm"
+                          onClick={(e) => {
+                            if (e.target === e.currentTarget) {
+                              e.preventDefault();
+                              addRowTable();
+                            }
+                          }}
+                        >
+                          Insert Row
+                        </button>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <TableRows
+                      rows={rows}
+                      tableRowRemove={tableRowRemove}
+                      onValUpdate={onValUpdate}
+                    />
+                    <tr>
+                      {activity_id ? (
+                        <td colSpan={3}></td>
+                      ) : (
+                        <Fragment>
+                          <td colSpan={2} className="text-end align-middle">
+                            ปิดบ่อ:
+                          </td>
+                          <td className="text-start align-middle">
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={handleIsChanged}
+                              className="form-check-input"
+                            />
+                          </td>
+                        </Fragment>
+                      )}
 
-          <form onSubmit={handleSubmit}>
-            <div className="">
-              <table
-                className="text-center table table-borderless"
-                width="100%"
+                      <td className="text-end align-middle">รายได้ทั้งหมด</td>
+                      <td>
+                        <input
+                          type="text"
+                          value={sellData.sum_profit}
+                          name="sum_profit"
+                          className="form-control"
+                          onChange={handleChange}
+                          disabled
+                        />
+                      </td>
+                      <td></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div style={{ height: "20px" }}></div>
+              <button type="submit" className="btn btn-primary btn-sm">
+                บันทึก
+              </button>
+              <Link
+                to={{
+                  pathname: `/fillData/sell`,
+                  state: {
+                    farm: selectFarm.farm,
+                    pond_id: selectFarm.pondId,
+                    pond_name: selectFarm.pondName,
+                    active_pond_id: activePondId,
+                    activity_id: activity_id,
+                    activities: pondActivities,
+                    is_closed: is_closed,
+                  },
+                }}
+                className="btn btn-warning ms-1 btn-sm"
+                onClick={() => setShouldRefresh(true)}
               >
-                <tbody>
-                  <tr>
-                    <td className="text-end pe-1 pt-2">
-                      <label htmlFor="date">วันที่ลงปลา:</label>
-                    </td>
-                    <td className="text-start">
-                      <input
-                        type="date"
-                        name="date_issued"
-                        id="date_issued"
-                        className="form-control form-control-sm"
-                        style={{ width: "125px" }}
-                        value={sellData.date_issued}
-                        onChange={handleChange}
-                      />
-                    </td>
-                    <td className="text-end  pt-2">
-                      <label htmlFor="date">ค่าใช้จ่าย:</label>
-                    </td>
-                    <td className="text-start">
-                      <input
-                        type="text"
-                        name="additional_cost"
-                        id="additional_cost"
-                        className="form-control form-control-sm"
-                        style={{ width: "80px" }}
-                        value={sellData.additional_cost}
-                        onChange={handleChange}
-                      />
-                    </td>
-                    <td className="text-end  pt-2">
-                      <label htmlFor="date">คนซื้อ:</label>
-                    </td>
-                    <td className="text-start">
-                      <select
-                        name="merchant_id"
-                        id="merchant_id"
-                        className="form-select form-select-sm"
-                        style={{ width: "80px" }}
-                        onChange={handleChange}
-                        value={sellData.merchant_id}
-                      >
-                        {Object.entries(merchantNameById).map(([id, name]) => (
-                          <option key={id} value={id}>
-                            {name}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div>
-              <table className="table table-borderless">
-                <thead>
-                  <tr className="text-center">
-                    <th>ดัชนี</th>
-                    <th>ไซส์</th>
-                    <th>จำนวนปลา (กก.)</th>
-                    <th>ราคาปลาต่อกิโล</th>
-                    <th>ขายได้</th>
-                    <th>
-                      <button
-                        className="btn btn-danger btn-sm"
-                        onClick={(e) => {
-                          if (e.target === e.currentTarget) {
-                            e.preventDefault();
-                            addRowTable();
-                          }
-                        }}
-                      >
-                        Insert Row
-                      </button>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <TableRows
-                    rows={rows}
-                    tableRowRemove={tableRowRemove}
-                    onValUpdate={onValUpdate}
-                  />
-                  <tr>
-                    {activity_id ? (
-                      <td colSpan={3}></td>
-                    ) : (
-                      <Fragment>
-                        <td colSpan={2} className="text-end align-middle">
-                          ปิดบ่อ:
-                        </td>
-                        <td className="text-start align-middle">
-                          <input
-                            type="checkbox"
-                            checked={isChecked}
-                            onChange={handleIsChanged}
-                            className="form-check-input"
-                          />
-                        </td>
-                      </Fragment>
-                    )}
-
-                    <td className="text-end align-middle">รายได้ทั้งหมด</td>
-                    <td>
-                      <input
-                        type="text"
-                        value={sellData.sum_profit}
-                        name="sum_profit"
-                        className="form-control"
-                        onChange={handleChange}
-                        disabled
-                      />
-                    </td>
-                    <td></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div style={{ height: "20px" }}></div>
-            <button className="btn btn-primary btn-sm">บันทึก</button>
-            <Link
-              to={{
-                pathname: `/fillData/sell`,
-                state: {
-                  farm: selectFarm.farm,
-                  pond_id: selectFarm.pondId,
-                  pond_name: selectFarm.pondName,
-                  active_pond_id: activePondId,
-                  activity_id: activity_id,
-                  activities: pondActivities,
-                },
-              }}
-              className="btn btn-warning ms-1 btn-sm"
-              onClick={() => setShouldRefresh(true)}
-            >
-              ยกเลิก
-            </Link>
-            <Link
-              to="#!"
-              className="btn btn-danger ms-1 btn-sm ps-3 pe-3"
-              onClick={() => console.log("not implement")}
-            >
-              ลบ
-            </Link>
-          </form>
+                ยกเลิก
+              </Link>
+              <button
+                type="button" // Specify type as "button" to prevent form submission
+                className="btn btn-danger ms-1 btn-sm ps-3 pe-3"
+                onClick={handleDelete}
+              >
+                ลบ
+              </button>
+            </form>
+          )}
         </div>
         <div className="col">
           <div className="text-end select-date mb-4">
@@ -529,6 +683,7 @@ const ActivitySell = () => {
               <SearchFarm
                 onChange={handleChangePond}
                 property_pond={selectFarm}
+                is_closed={is_closed}
               />
             </form>
           </div>
@@ -546,7 +701,6 @@ const ActivitySell = () => {
                 </tr>
               </thead>
               <tbody className="text-center">
-                {console.log("pond_activities", pondActivities)}
                 {pondActivities.slice(0, 6).map((activity, index) => (
                   <Fragment key={index}>
                     <tr>
@@ -576,6 +730,7 @@ const ActivitySell = () => {
                               active_pond_id: activePondId,
                               activity_id: activity.activity_id,
                               activities: pondActivities,
+                              is_closed: is_closed,
                             },
                           }}
                           className="link-dark"

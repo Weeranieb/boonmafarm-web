@@ -8,7 +8,6 @@ const OnePond = () => {
   // we need to get the "prop" passed to this component
   const location = useLocation();
   const activePondId = location.state?.active_pond_id;
-  console.log(location.state);
 
   // set stateful variables
   const [activePond, setActivePond] = useState({});
@@ -33,6 +32,7 @@ const OnePond = () => {
         );
         const data = await response.json();
         if (data.result) {
+          console.log(data.result);
           setActivePond(data.result);
           fetchPondHistories(data.result.pond_id);
         } else {
@@ -160,7 +160,6 @@ const OnePond = () => {
             <div className="row">
               <div className="col text-center" style={{ fontSize: "35px" }}>
                 {activePond.pond_name}
-                {/* บ่อ: {activePond.pond_name.slice(4)} */}
               </div>
               <div
                 className="col-9 d-flex align-items-start justify-content-between align-bottom"
@@ -227,7 +226,7 @@ const OnePond = () => {
           >
             <div className="d-flex justify-content-between">
               <div className="box-header">กิจกรรมล่าสุด</div>
-              <div className="text-primary watch-all">ดูทั้งหมด</div>
+              {/* <div className="text-primary watch-all">ดูทั้งหมด</div> */}
             </div>
             <table className="table" style={{ width: "100%" }}>
               <tbody>
@@ -249,11 +248,12 @@ const OnePond = () => {
                             pathname: `/fillData/${act.activity_type}`,
                             state: {
                               farm: activePond.farm,
-                              pond_id: activePond.pondId,
-                              pond_name: activePond.pondName,
+                              pond_id: activePond.pond_id,
+                              pond_name: activePond.pond_name,
                               active_pond_id: activePondId,
                               activity_id: act.activity_id,
                               activities: activities,
+                              is_closed: activePond.is_close === "Y",
                             },
                           }}
                           className="text-decoration-none text-dark"

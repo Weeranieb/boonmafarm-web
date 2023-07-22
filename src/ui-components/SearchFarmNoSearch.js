@@ -4,6 +4,7 @@ const SearchFarmNoSearch = (props) => {
 
   const selectedPondName =
     property_pond && property_pond.pondName ? property_pond.pondName : "";
+  console.log("selectedPondName is", selectedPondName);
   return (
     <Fragment>
       <select

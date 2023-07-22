@@ -1,13 +1,9 @@
 import React, { useState } from "react";
-import { useHistory, useLocation } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 
 const SelectActivity = (props) => {
   const [selectedOption, setSelectedOption] = useState(props.act);
   const history = useHistory();
-  const location = useLocation();
-
-  const { farm, pond_id, pond_name, active_pond_id, activity_id, activities } =
-    location.state || {};
 
   const handleChange = (event) => {
     const selectedValue = event.target.value;
@@ -15,12 +11,13 @@ const SelectActivity = (props) => {
 
     const path = `/fillData/${selectedValue}`;
     const state = {
-      farm,
-      pond_id,
-      pond_name,
-      active_pond_id,
-      activity_id,
-      activities,
+      farm: props.farm,
+      pond_id: props.pond_id,
+      pond_name: props.pond_name,
+      active_pond_id: props.active_pond_id,
+      activity_id: props.activity_id,
+      activities: props.activities,
+      is_closed: props.is_closed,
     };
 
     history.push({ pathname: path, state });
@@ -33,10 +30,17 @@ const SelectActivity = (props) => {
         onChange={handleChange}
         className="form-select btn-secondary"
         style={{ width: "110px", fontSize: "17px", fontWeight: "500" }}
+        disabled={props.is_closed} // Disable the select element when props.is_closed is true
       >
-        <option value="fill">ลงปลา</option>
-        <option value="move">ย้ายปลา</option>
-        <option value="sell">ขายปลา</option>
+        <option value="fill" disabled={props.is_closed}>
+          ลงปลา
+        </option>
+        <option value="move" disabled={props.is_closed}>
+          ย้ายปลา
+        </option>
+        <option value="sell" disabled={props.is_closed}>
+          ขายปลา
+        </option>
       </select>
     </div>
   );

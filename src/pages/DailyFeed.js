@@ -66,9 +66,9 @@ const DailyFeed = () => {
           daily_feed_id: idByPondName.get(pondKey) || i,
           active_pond_id: -1,
           pond_id: pondId,
-          feed_type: "เหยื่อสด",
+          feed_type: "fish",
           feed_amount: feed,
-          feed_unit: "ลัง",
+          feed_unit: "box",
           farm: farm,
           date_issued: `${year}-${month
             .toString()
@@ -78,7 +78,7 @@ const DailyFeed = () => {
       }
     }
     const requestBody = {
-      feed_type: "เหยื่อสด",
+      feed_type: "fish",
       farm: farm,
       daily_feed: daiyFeeds,
     };
@@ -142,7 +142,7 @@ const DailyFeed = () => {
           };
 
           const response = await fetch(
-            `${process.env.REACT_APP_BACKEND}/api/v1/feed/getDailyFeeds?feed_type=เหยื่อสด&farm=${farm}&month=${month}&year=${year}`,
+            `${process.env.REACT_APP_BACKEND}/api/v1/feed/getDailyFeeds?feed_type=fish&farm=${farm}&month=${month}&year=${year}`,
             requestOptions
           );
           const data = await response.json();

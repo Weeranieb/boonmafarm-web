@@ -13,8 +13,16 @@ import { changeTimeUTCToThaiDate } from "../utils/date";
 const ActivityFill = () => {
   const history = useHistory();
   const location = useLocation();
-  const { farm, pond_id, pond_name, active_pond_id, activity_id, activities } =
-    location.state ?? {};
+  const {
+    farm,
+    pond_id,
+    pond_name,
+    active_pond_id,
+    activity_id,
+    activities,
+    is_closed,
+  } = location.state ?? {};
+
   // set state
   const [selectFarm, setSelectFarm] = useState({
     farm: farm ?? "ฟาร์ม 1",
@@ -181,8 +189,7 @@ const ActivityFill = () => {
     }));
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
+  const saveFill = (status) => {
     const amount = Number(fillData.amount);
     const price_per_unit = Number(fillData.price_per_unit);
     const weight_per_fish = Number(fillData.weight_per_fish);
@@ -215,7 +222,7 @@ const ActivityFill = () => {
         fish_unit: "kilogram",
         additional_cost: additional_cost,
         date_issued: `${fillData.date_issued}T00:00:00Z`,
-        record_status: "A",
+        record_status: status,
       },
     };
 
@@ -246,6 +253,7 @@ const ActivityFill = () => {
 
     const refreshStateAfterSave = (fillHistory) => {
       // if it's new than new save
+      let filterPondAct = [];
       if (fillInId < 0)
         pondActivities.unshift({
           activity_id: fillHistory.fill_in_id,
@@ -253,6 +261,15 @@ const ActivityFill = () => {
           date: changeTimeUTCToThaiDate(fillHistory.date_issued),
           detail: `เติมปลา บ่อ ${pond_name}`,
         });
+
+      if (status === "S") {
+        const conditionToRemove = (obj) =>
+          obj.activity_type === "fill" &&
+          obj.activity_id === fillHistory.fill_in_id;
+
+        filterPondAct = pondActivities.filter((obj) => !conditionToRemove(obj));
+      }
+
       history.push({
         pathname: "/fillData/fill", // or the current path if needed
         state: {
@@ -260,16 +277,35 @@ const ActivityFill = () => {
           pond_id: selectFarm.pondId,
           pond_name: selectFarm.pondName,
           active_pond_id: fillHistory.active_pond_id,
-          activity_id: fillHistory.fill_in_id,
-          activities: pondActivities,
+          activity_id: status === "A" ? fillHistory.fill_in_id : undefined,
+          activities: status === "A" ? pondActivities : filterPondAct,
+          is_closed: is_closed,
         },
       });
+
+      // Reload the page after history.push
+      window.location.reload();
     };
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    saveFill("A");
+  };
+
+  const handleDelete = (event) => {
+    event.preventDefault();
+    saveFill("S");
   };
 
   return (
     <div>
-      <div className="header">กิจกรรมบ่อ {pond_name || "1ซ้าย"}</div>
+      <div className="header">
+        กิจกรรมบ่อ {pond_name || "1ซ้าย"}
+        <span className="btn btn-primary btn-sm ms-3">
+          {is_closed ? "ปิดบ่อ" : "ปัจจุบันเลี้ยง"}
+        </span>
+      </div>
       <hr />
       <div className="row">
         <div className="col-6">
@@ -281,146 +317,157 @@ const ActivityFill = () => {
             active_pond_id={active_pond_id}
             activity_id={activity_id}
             activities={activities}
+            is_closed={is_closed}
           />
-          <form onSubmit={handleSubmit}>
-            <div className="input">
-              <table
-                className="text-center table table-borderless"
-                width="100%"
+          {(!is_closed || activity_id > 0) && (
+            <form onSubmit={handleSubmit}>
+              <div className="input">
+                <table
+                  className="text-center table table-borderless"
+                  width="100%"
+                >
+                  <tbody>
+                    <tr>
+                      <td className="text-end pe-4">
+                        <label htmlFor="date_issued">วันที่ลงปลา:</label>
+                      </td>
+                      <td className="text-start">
+                        <input
+                          type="date"
+                          name="date_issued"
+                          id="date_issued"
+                          value={fillData.date_issued}
+                          className="form-control form-control-sm"
+                          style={{ width: "185px" }}
+                          onChange={handleChange}
+                        />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="text-end pe-4">
+                        <label htmlFor="amount">จำนวนปลาที่ลง:</label>
+                      </td>
+                      <td className="text-start">
+                        <input
+                          type="text"
+                          name="amount"
+                          inputMode="numeric"
+                          id="amount"
+                          value={fillData.amount}
+                          className="form-control form-control-sm"
+                          style={{ width: "185px" }}
+                          onChange={handleChange}
+                        />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="text-end pe-4">
+                        <label htmlFor="weight_per_fish">
+                          น้ำหนักปลาต่อตัว:
+                        </label>
+                      </td>
+                      <td className="text-start">
+                        <input
+                          type="text"
+                          name="weight_per_fish"
+                          inputMode="numeric"
+                          id="weight_per_fish"
+                          value={fillData.weight_per_fish}
+                          className="form-control form-control-sm"
+                          style={{ width: "185px" }}
+                          onChange={handleChange}
+                        />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="text-end pe-4">
+                        <label htmlFor="price_per_unit">ราคาปลา:</label>
+                      </td>
+                      <td className="text-start">
+                        <input
+                          type="text"
+                          name="price_per_unit"
+                          inputMode="numeric"
+                          id="price_per_unit"
+                          value={fillData.price_per_unit}
+                          className="form-control form-control-sm"
+                          style={{ width: "185px" }}
+                          onChange={handleChange}
+                        />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="text-end pe-4">
+                        <label htmlFor="additional_cost">ค่าใช้จ่าย:</label>
+                      </td>
+                      <td className="text-start">
+                        <input
+                          type="text"
+                          name="additional_cost"
+                          inputMode="numeric"
+                          id="additionalCost"
+                          value={fillData.additional_cost}
+                          className="form-control form-control-sm"
+                          style={{ width: "185px" }}
+                          onChange={handleChange}
+                        />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="text-end pe-4">
+                        <label htmlFor="cost">ต้นทุน:</label>
+                      </td>
+                      <td className="text-start">
+                        <input
+                          type="text"
+                          name="cost"
+                          value={fillData.cost}
+                          inputMode="numeric"
+                          id="cost"
+                          className="form-control form-control-sm"
+                          style={{ width: "185px" }}
+                          onChange={handleChange}
+                          disabled
+                        />
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div style={{ height: "20px" }}></div>
+              <button
+                type="submit"
+                className="btn btn-primary btn-sm ps-2 pe-2"
               >
-                <tbody>
-                  <tr>
-                    <td className="text-end pe-4">
-                      <label htmlFor="date_issued">วันที่ลงปลา:</label>
-                    </td>
-                    <td className="text-start">
-                      <input
-                        type="date"
-                        name="date_issued"
-                        id="date_issued"
-                        value={fillData.date_issued}
-                        className="form-control form-control-sm"
-                        style={{ width: "185px" }}
-                        onChange={handleChange}
-                      />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="text-end pe-4">
-                      <label htmlFor="amount">จำนวนปลาที่ลง:</label>
-                    </td>
-                    <td className="text-start">
-                      <input
-                        type="text"
-                        name="amount"
-                        inputMode="numeric"
-                        id="amount"
-                        value={fillData.amount}
-                        className="form-control form-control-sm"
-                        style={{ width: "185px" }}
-                        onChange={handleChange}
-                      />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="text-end pe-4">
-                      <label htmlFor="weight_per_fish">น้ำหนักปลาต่อตัว:</label>
-                    </td>
-                    <td className="text-start">
-                      <input
-                        type="text"
-                        name="weight_per_fish"
-                        inputMode="numeric"
-                        id="weight_per_fish"
-                        value={fillData.weight_per_fish}
-                        className="form-control form-control-sm"
-                        style={{ width: "185px" }}
-                        onChange={handleChange}
-                      />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="text-end pe-4">
-                      <label htmlFor="price_per_unit">ราคาปลา:</label>
-                    </td>
-                    <td className="text-start">
-                      <input
-                        type="text"
-                        name="price_per_unit"
-                        inputMode="numeric"
-                        id="price_per_unit"
-                        value={fillData.price_per_unit}
-                        className="form-control form-control-sm"
-                        style={{ width: "185px" }}
-                        onChange={handleChange}
-                      />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="text-end pe-4">
-                      <label htmlFor="additional_cost">ค่าใช้จ่าย:</label>
-                    </td>
-                    <td className="text-start">
-                      <input
-                        type="text"
-                        name="additional_cost"
-                        inputMode="numeric"
-                        id="additionalCost"
-                        value={fillData.additional_cost}
-                        className="form-control form-control-sm"
-                        style={{ width: "185px" }}
-                        onChange={handleChange}
-                      />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="text-end pe-4">
-                      <label htmlFor="cost">ต้นทุน:</label>
-                    </td>
-                    <td className="text-start">
-                      <input
-                        type="text"
-                        name="cost"
-                        value={fillData.cost}
-                        inputMode="numeric"
-                        id="cost"
-                        className="form-control form-control-sm"
-                        style={{ width: "185px" }}
-                        onChange={handleChange}
-                        disabled
-                      />
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div style={{ height: "20px" }}></div>
-            <button className="btn btn-primary btn-sm">บันทึก</button>
-            <Link
-              to={{
-                pathname: `/fillData/fill`,
-                state: {
-                  farm: selectFarm.farm,
-                  pond_id: selectFarm.pondId,
-                  pond_name: selectFarm.pondName,
-                  active_pond_id: activePondId,
-                  activity_id: activity_id,
-                  activities: pondActivities,
-                },
-              }}
-              className="btn btn-warning ms-1 btn-sm"
-              onClick={() => setShouldRefresh(true)}
-            >
-              ยกเลิก
-            </Link>
-            <Link
-              to="#!"
-              className="btn btn-danger ms-1 btn-sm ps-3 pe-3"
-              onClick={() => console.log("not implement")}
-            >
-              ลบ
-            </Link>
-          </form>
+                บันทึก
+              </button>
+              <Link
+                to={{
+                  pathname: `/fillData/fill`,
+                  state: {
+                    farm: selectFarm.farm,
+                    pond_id: selectFarm.pondId,
+                    pond_name: selectFarm.pondName,
+                    active_pond_id: activePondId,
+                    activity_id: activity_id,
+                    activities: pondActivities,
+                    is_closed: is_closed,
+                  },
+                }}
+                className="btn btn-warning ms-1 btn-sm"
+                onClick={() => setShouldRefresh(true)}
+              >
+                ยกเลิก
+              </Link>
+              <button
+                type="button" // Specify type as "button" to prevent form submission
+                className="btn btn-danger ms-1 btn-sm ps-3 pe-3"
+                onClick={handleDelete}
+              >
+                ลบ
+              </button>
+            </form>
+          )}
         </div>
         <div className="col">
           <div className="text-end select-date mb-4">
@@ -428,6 +475,7 @@ const ActivityFill = () => {
               <SearchFarm
                 onChange={handleChangePond}
                 property_pond={selectFarm}
+                is_closed={is_closed}
               />
             </form>
           </div>
@@ -476,6 +524,7 @@ const ActivityFill = () => {
                               active_pond_id: activePondId,
                               activity_id: activity.activity_id,
                               activities: pondActivities,
+                              is_closed: is_closed,
                             },
                           }}
                           className="link-dark"
